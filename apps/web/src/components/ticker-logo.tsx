@@ -1,48 +1,30 @@
+/* eslint-disable @next/next/no-img-element */
 import type { ReactNode } from "react";
-import {
-  siAlibabadotcom, siAmd, siApple, siAtlassian, siBlackberry, siBoeing, siBroadcom, siCircle, siCisco, siCloudflare,
-  siCoinbase, siDatadog, siDell, siDigitalocean, siFigma, siFord, siFortinet, siGeneralelectric, siGoogle, siIntel,
-  siIntuit, siMcdonalds, siMeta, siMongodb, siNetflix, siNvidia, siPaloaltonetworks, siPalantir, siPaypal, siQualcomm,
-  siReddit, siRoblox, siShopify, siSnapchat, siSnowflake, siSpacex, siSupermicro, siTaketwointeractivesoftware, siTesla,
-  siUber, siUipath, siUps, siVisa, siZoom,
-  type SimpleIcon,
-} from "simple-icons";
 
 /**
- * Issuer marks for Stock Token tickers (PM revision 2026-11-06), from simple-icons (CC0 path data;
- * the marks themselves remain their owners' trademarks — used only to identify the underlying stock,
- * no affiliation implied). Curated by ticker, never fuzzy-matched by name. Tickers without a mark in
- * simple-icons (e.g. AMZN, MSFT, ETFs) fall back to the monogram the caller passes in.
+ * Issuer logos for Stock Token tickers (PM revision 2026-11-06). Files are vendored locally in
+ * public/logos/<TICKER>.png (no runtime third-party fetch). Marks remain their owners' trademarks and
+ * are used only to identify the underlying stock / ETF issuer — no affiliation implied.
+ * Unmapped tickers fall back to the caller's monogram.
  */
-const LOGOS: Record<string, SimpleIcon> = {
-  AAPL: siApple, AMD: siAmd, AVGO: siBroadcom, BA: siBoeing, BABA: siAlibabadotcom, BB: siBlackberry, COIN: siCoinbase,
-  CRCL: siCircle, CSCO: siCisco, DDOG: siDatadog, DELL: siDell, DOCN: siDigitalocean, F: siFord, FIG: siFigma,
-  FTNT: siFortinet, GE: siGeneralelectric, GOOGL: siGoogle, GOOG: siGoogle, INTC: siIntel, INTU: siIntuit,
-  MCD: siMcdonalds, MDB: siMongodb, META: siMeta, NET: siCloudflare, NFLX: siNetflix, NVDA: siNvidia,
-  PANW: siPaloaltonetworks, PATH: siUipath, PLTR: siPalantir, PYPL: siPaypal, QCOM: siQualcomm, RBLX: siRoblox,
-  RDDT: siReddit, SHOP: siShopify, SMCI: siSupermicro, SNAP: siSnapchat, SNOW: siSnowflake, SPCX: siSpacex,
-  TEAM: siAtlassian, TSLA: siTesla, TTWO: siTaketwointeractivesoftware, UBER: siUber, UPS: siUps, V: siVisa, ZM: siZoom,
-};
+const LOGOS = new Set<string>(["AAOI", "AAPL", "ABCL", "ADBE", "AEHR", "AEIS", "ALAB", "AMAT", "AMBA", "AMC", "AMD", "AMKR", "AMZN", "ANET", "APLD", "APP", "ASML", "ASTS", "AUR", "AVAV", "AVGO", "AXON", "AXTI", "BA", "BABA", "BB", "BE", "BMNR", "BND", "BULL", "CBRS", "CCL", "CEG", "CELH", "CIEN", "CLOV", "CLS", "CLSK", "COHR", "COIN", "COST", "CRCL", "CRDO", "CRM", "CRWD", "CRWV", "CSCO", "CTSH", "CVNA", "DDOG", "DELL", "DIS", "DJT", "DOCN", "ELF", "EWT", "EWY", "F", "FICO", "FIG", "FISV", "FIX", "FLNC", "FLY", "FTNT", "FUTU", "GDX", "GE", "GEV", "GLD", "GLW", "GLXY", "GME", "GOOG", "GOOGL", "HII", "HIMS", "HPE", "HWM", "IBM", "IBRX", "INDA", "INFQ", "INOD", "INTC", "INTU", "IONQ", "IREN", "JBL", "JNJ", "JOBY", "JPM", "KLAC", "KSS", "KTOS", "LHX", "LITE", "LLY", "LMT", "LRCX", "LULU", "LUNR", "MCD", "MDB", "META", "MOD", "MPWR", "MRNA", "MRVL", "MSFT", "MSTR", "MTSI", "MU", "MXL", "NAVN", "NBIS", "NET", "NFLX", "NNE", "NOW", "NU", "NVDA", "NVTS", "OKLO", "ON", "ONTO", "ORCL", "OUST", "P", "PANW", "PATH", "PENG", "PFE", "PL", "PLTR", "POET", "POWL", "PR", "PWR", "PYPL", "QBTS", "QCOM", "QNT", "QQQ", "QUBT", "RBLX", "RCAT", "RDDT", "RDW", "RGTI", "RIVN", "RKLB", "RUN", "SATS", "SCHD", "SGOV", "SHOP", "SHY", "SIMO", "SKHY", "SLS", "SLV", "SMCI", "SMH", "SMR", "SNAP", "SNDK", "SNOW", "SOFI", "SOUN", "SOXX", "SPCX", "SPMO", "SPY", "TE", "TEAM", "TEM", "TER", "TSEM", "TSLA", "TSM", "TTD", "TTWO", "UBER", "UMC", "UNH", "UPS", "USAR", "USO", "V", "VICR", "VRT", "VSAT", "VST", "VTI", "WDAY", "WDC", "WULF", "WYFI", "XLK", "XNDU", "XOM", "ZETA", "ZM", "ZS"]);
 
-export const hasLogo = (symbol: string) => symbol.toUpperCase() in LOGOS;
+export const hasLogo = (symbol: string) => LOGOS.has(symbol.toUpperCase());
 
-/** Round issuer logo chip; renders `fallback` (monogram) when no mark is mapped. */
 export function TickerLogo({ symbol, size = 28, fallback }: { symbol: string; size?: number; fallback: ReactNode }) {
-  const icon = LOGOS[symbol.toUpperCase()];
-  if (!icon) return <>{fallback}</>;
-  const inner = Math.round(size * 0.56);
-  const n = parseInt(icon.hex, 16);
-  const light = 0.2126 * (n >> 16) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255) > 190; // e.g. Snapchat yellow
+  const s = symbol.toUpperCase();
+  if (!LOGOS.has(s)) return <>{fallback}</>;
   return (
-    <span
+    <img
+      src={`/logos/${s}.png`}
+      alt={`${s} logo`}
       role="img"
-      aria-label={`${icon.title} logo`}
-      className={`inline-grid shrink-0 place-items-center rounded-full ring-1 ring-white/10 ${light ? "bg-void" : "bg-ivory"}`}
+      width={size}
+      height={size}
+      loading="lazy"
+      decoding="async"
+      className="inline-block shrink-0 rounded-full bg-[#1c1c1e] object-cover ring-1 ring-white/10"
       style={{ width: size, height: size }}
-    >
-      <svg viewBox="0 0 24 24" width={inner} height={inner} fill={`#${icon.hex}`} aria-hidden="true">
-        <path d={icon.path} />
-      </svg>
-    </span>
+    />
   );
 }
