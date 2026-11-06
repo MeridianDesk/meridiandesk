@@ -166,6 +166,27 @@ export const appUi = {
   optionsBuyOnly: "Buy-to-open only in v1",
 } as const;
 
+/** Draft copy — tx success popup. */
+export const txReceipt = {
+  title: "Transaction confirmed",
+  hashLabel: "Transaction hash",
+  viewOnExplorer: "View on Blockscout",
+  copy: "Copy",
+  copied: "Copied",
+  close: "Close",
+  previewNote: "Dev preview — opened from ?txpreview, not from a Meridian order.",
+} as const;
+
+/** Draft copy — landing footer contract list. */
+export const contractFooter = {
+  title: "Contracts",
+  note: "Verify every address on Blockscout before interacting.",
+  contract: "Contract",
+  notDeployed: "Not deployed",
+  copy: "Copy",
+  copied: "Copied",
+} as const;
+
 export const legal = {
   denimExplainer:
     "Denim-grade means our execution UX bar (speed + clarity), inspired by Base’s Denim upgrade narrative — Meridian runs on Robinhood Chain, not Base.",

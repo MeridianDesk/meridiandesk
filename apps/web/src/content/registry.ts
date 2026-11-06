@@ -1,3 +1,5 @@
+import { chains } from "./chain";
+
 /**
  * MarketRegistry v0 — the FULL support catalog (brief §11). Dashboard renders 100% of it.
  *
@@ -29,7 +31,8 @@ export type Market = {
 };
 
 export const REGISTRY_SNAPSHOT = "2026-11-06";
-export const CHAIN_EXPLORER = "https://robin.etherscan.io";
+/** Stock Token + feed addresses are mainnet (4663) — link to the mainnet Blockscout. */
+export const CHAIN_EXPLORER = chains[4663].explorer;
 
 const FEATURED = new Set(["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "SPY", "QQQ", "AMD", "NFLX", "COIN", "PLTR", "AVGO"]);
 

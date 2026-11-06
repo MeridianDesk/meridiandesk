@@ -2,6 +2,7 @@ import Link from "next/link";
 import { brand, desks, hero, how, latency, legal, manifesto, markets, proof, risk, why } from "@/content/copy";
 import { clusters, featured } from "@/content/featured";
 import { OptionsArt, PerpsArt } from "@/components/home/desk-art";
+import { ContractAddresses } from "@/components/home/contract-addresses";
 import { DeskTicket } from "@/components/home/desk-ticket";
 import { VNav } from "@/components/home/nav";
 import { WaveStage } from "@/components/home/particle-wave";
@@ -336,6 +337,9 @@ export default function Home() {
             <div className="space-y-3 text-[12px] leading-relaxed text-smoke md:col-span-3">
               <p>{legal.affiliation}</p>
               <p>{legal.disclaimer}</p>
+            </div>
+            <div className="md:col-span-12">
+              <ContractAddresses />
             </div>
           </div>
         </WaveStage>
