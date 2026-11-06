@@ -146,6 +146,26 @@ export const app = {
   liqWarning: "Low leverage does not remove liquidation risk",
 } as const;
 
+/**
+ * In-app strings beyond §17.7. Draft copy — new copy, not from the brief.
+ */
+export const appUi = {
+  connect: "Connect wallet",
+  connectNote: "Wallet connection opens with the guarded testnet.",
+  preTestnet: "Engine pre-testnet",
+  preTestnetNote: "Orders open when this desk reaches guarded testnet. Nothing here executes yet.",
+  catalogTitle: "All Stock Tokens",
+  catalogCount: (shown: number, total: number) => `${shown} of ${total}`,
+  searchPlaceholder: "Search symbol or name",
+  oracleStream: "Oracle stream not connected",
+  chartEmpty: "Chart appears when the oracle stream is connected. No synthetic price data is shown.",
+  newlyListedEmpty: "Listing dates arrive with the registry sync. Nothing is hidden — clear this filter to see every market.",
+  registryNote: (date: string) => `Registry snapshot ${date} · every supported Stock Token, no subset`,
+  portfolioEmpty: "Connect a wallet to see positions. Perps and Options positions are tracked separately.",
+  sessionNote: "Oracle feeds follow US equities 24/5 market hours. Expect gaps across weekends and holidays.",
+  optionsBuyOnly: "Buy-to-open only in v1",
+} as const;
+
 export const legal = {
   denimExplainer:
     "Denim-grade means our execution UX bar (speed + clarity), inspired by Base’s Denim upgrade narrative — Meridian runs on Robinhood Chain, not Base.",
