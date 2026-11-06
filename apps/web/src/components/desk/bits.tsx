@@ -1,3 +1,4 @@
+import { TickerLogo } from "@/components/ticker-logo";
 import { app } from "@/content/copy";
 import type { DeskStatus, Market, Sector } from "@/content/registry";
 
@@ -29,8 +30,12 @@ const tint: Record<Sector, string> = {
   "ETFs & Funds": "from-ivory to-dawn",
 };
 
-/** Ticker monogram, not a company logo (no third-party marks). */
+/** Issuer logo when mapped (see ticker-logo.tsx), otherwise the ticker monogram. */
 export function Glyph({ m, size = 28 }: { m: Pick<Market, "symbol" | "sector">; size?: number }) {
+  return <TickerLogo symbol={m.symbol} size={size} fallback={<Mono m={m} size={size} />} />;
+}
+
+function Mono({ m, size }: { m: Pick<Market, "symbol" | "sector">; size: number }) {
   return (
     <span
       aria-hidden="true"

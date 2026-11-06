@@ -1,3 +1,4 @@
+import { TickerLogo } from "@/components/ticker-logo";
 import Link from "next/link";
 import type { FeaturedToken } from "@/content/featured";
 
@@ -60,8 +61,12 @@ const ring: Record<FeaturedToken["cluster"], string> = {
   Liquid: "from-haze to-smoke",
 };
 
-/** Ticker monogram — not a company logo (no third-party marks). */
+/** Issuer logo when mapped (see ticker-logo.tsx), otherwise the ticker monogram. */
 export function Monogram({ t, size = 22 }: { t: FeaturedToken; size?: number }) {
+  return <TickerLogo symbol={t.symbol} size={size} fallback={<Mono t={t} size={size} />} />;
+}
+
+function Mono({ t, size }: { t: FeaturedToken; size: number }) {
   return (
     <span
       className={`inline-grid shrink-0 place-items-center rounded-full bg-gradient-to-br ${ring[t.cluster]} font-zal text-[9px] font-semibold text-void`}

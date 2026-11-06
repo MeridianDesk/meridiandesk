@@ -186,6 +186,16 @@ export const wallet = {
 } as const;
 
 /** Draft copy — testnet trading (46630). */
+// Draft copy — market chart (PM revision 2026-11-06)
+export const chartUi = {
+  title: (s: string) => `${s} / USD · Chainlink oracle · 7D`,
+  lastRound: "Last round",
+  loading: "Loading oracle history…",
+  unavailable: "Oracle history unavailable",
+  source: (n: number) => `Source: Chainlink feed on Robinhood Chain mainnet, last ${n} on-chain rounds. Oracle updates, not a trade tape. US equities trade 24/5 — expect flat weekends.`,
+  aria: (s: string, n: number) => `${s} oracle price, ${n} Chainlink rounds`,
+} as const;
+
 export const testnetDesk = {
   badge: "Testnet",
   illustrative: "Illustrative · testnet mirror of the mainnet Chainlink feed, refreshed manually",

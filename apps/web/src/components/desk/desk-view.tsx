@@ -9,12 +9,30 @@ import { Glyph, Row, short, StatusBadge } from "./bits";
 import { Catalog, type Desk } from "./catalog";
 import { OptionsTicket, PerpsTicket, TicketHeader } from "./tickets";
 import { LiveMark, LivePerpsTicket, LivePositions, useMarketStats } from "./live";
-import { fmtPx, fmtUsd, useOraclePrice } from "@/lib/onchain";
+import { ago, fmtPx, fmtUsd, useOraclePrice } from "@/lib/onchain";
+import { change24h, usePriceHistory } from "@/lib/price-history";
+import { PriceChart } from "./price-chart";
 
 /** Market header + chart placeholder. Every oracle-derived value is an em dash until feeds connect. */
 function MarkStat({ lm }: { lm: ListedMarket }) {
   const { price } = useOraclePrice(lm.token);
   return <>{price ? fmtPx(price) : "—"}</>;
+}
+
+function ChangeStat({ feed }: { feed: `0x${string}` }) {
+  const c = change24h(usePriceHistory(feed).data);
+  if (c == null) return <>—</>;
+  return <span className={c >= 0 ? "text-dawn-hi" : "text-haze"}>{`${c >= 0 ? "+" : ""}${(c * 100).toFixed(2)}%`}</span>;
+}
+
+/** Testnet mark (MirrorFeed) under the mainnet chart, with staleness. */
+function TestnetMarkLine({ lm }: { lm: ListedMarket }) {
+  const { price, updatedAt, error } = useOraclePrice(lm.token);
+  return (
+    <p className="px-5 pb-3 font-plex text-[11px] text-haze">
+      {testnetDesk.badge} mark <span className="text-ivory">{price ? `$${fmtPx(price)}` : "—"}</span> · {error ? testnetDesk.stale : updatedAt ? testnetDesk.updated(ago(updatedAt)) : "—"}
+    </p>
+  );
 }
 
 function OiStat({ lm }: { lm: ListedMarket }) {
@@ -37,7 +55,7 @@ function MarketPanel({ m, desk, lm }: { m: Market; desk: Desk; lm: ListedMarket 
           </div>
         </div>
         <dl className="flex flex-wrap gap-x-6 gap-y-1 font-plex text-[12px]">
-          {([["Oracle mark", lm ? <MarkStat key="mk" lm={lm} /> : "—"], ["24h", "—"], [desk === "perps" ? "Funding" : "IV", "—"], ["Open interest", lm ? <OiStat key="oi" lm={lm} /> : "—"]] as const).map(([k, v]) => (
+          {([["Oracle mark", lm ? <MarkStat key="mk" lm={lm} /> : "—"], ["24h", m.oracle ? <ChangeStat key="ch" feed={m.oracle} /> : "—"], [desk === "perps" ? "Funding" : "IV", "—"], ["Open interest", lm ? <OiStat key="oi" lm={lm} /> : "—"]] as const).map(([k, v]) => (
             <div key={k}>
               <dt className="text-[10.5px] uppercase tracking-[0.08em] text-smoke">{k}</dt>
               <dd className="text-ivory/70">{v}</dd>
@@ -56,7 +74,12 @@ function MarketPanel({ m, desk, lm }: { m: Market; desk: Desk; lm: ListedMarket 
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" />
         </svg>
-        {lm ? (
+        {m.oracle ? (
+          <div className="relative flex h-full w-full flex-col">
+            <PriceChart symbol={m.symbol} feed={m.oracle} />
+            {lm ? <TestnetMarkLine lm={lm} /> : null}
+          </div>
+        ) : lm ? (
           <LiveMark lm={lm} />
         ) : (
           <div className="relative max-w-[360px] px-6 text-center">
