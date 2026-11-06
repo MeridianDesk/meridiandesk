@@ -166,6 +166,25 @@ export const appUi = {
   optionsBuyOnly: "Buy-to-open only in v1",
 } as const;
 
+/** Draft copy — wallet connect. */
+export const wallet = {
+  title: "Connect a wallet",
+  account: "Wallet",
+  close: "Close",
+  browserWallet: "Browser wallet",
+  confirmInWallet: "Confirm in wallet…",
+  noWallet: "No browser wallet detected. Install one, then reload:",
+  errorPrefix: "Connection failed.",
+  footnote: "Meridian never holds your keys. Connecting does not sign or send any transaction.",
+  switchTo: "Switch to",
+  switchFailed: "Network switch was rejected.",
+  phantomUnsupported:
+    "Phantom does not support Robinhood Chain as a custom network. Use MetaMask, Rabby or another EVM wallet that can add networks.",
+  copy: "Copy address",
+  copied: "Copied",
+  disconnect: "Disconnect",
+} as const;
+
 /** Draft copy — tx success popup. */
 export const txReceipt = {
   title: "Transaction confirmed",

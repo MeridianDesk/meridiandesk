@@ -4,6 +4,7 @@ import { useState } from "react";
 import { app, appUi } from "@/content/copy";
 import type { Market } from "@/content/registry";
 import { LatencyChip, Row } from "./bits";
+import { useUsdgBalance } from "./wallet";
 
 type Lev = (typeof app.leverageOptions)[number];
 
@@ -36,11 +37,12 @@ function Submit({ label, m }: { label: string; m: Market | null }) {
 
 function SizeField({ id }: { id: string }) {
   const [v, setV] = useState("");
+  const usdg = useUsdgBalance();
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 flex justify-between font-inter text-[12.5px] text-haze">
         <span>Size</span>
-        <span className="font-plex text-[11px] text-smoke">Balance —</span>
+        <span className="font-plex text-[11px] text-smoke">Balance {usdg}</span>
       </label>
       <div className="flex h-10 items-center rounded-[4px] border border-white/10 bg-void px-3 focus-within:border-dawn/60">
         <input

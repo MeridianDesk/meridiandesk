@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { appUi, brand } from "@/content/copy";
+import { brand } from "@/content/copy";
+import { ACTIVE_CHAIN_ID, chains } from "@/content/chain";
 import { VMark } from "@/components/home/parts";
 import { LatencyChip } from "./bits";
+import { WalletButton } from "./wallet";
 
 const tabs = [
   { label: "Perps", href: "/app/perps" },
@@ -16,7 +17,6 @@ const tabs = [
 
 export function AppHeader() {
   const path = usePathname();
-  const [note, setNote] = useState(false);
   return (
     <header className="sticky top-0 z-30 border-b border-white/[0.07] bg-void/90 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-[1480px] items-center gap-2 px-3 sm:gap-4 md:px-6">
@@ -43,27 +43,12 @@ export function AppHeader() {
         </nav>
         <div className="ml-auto flex items-center gap-3">
           <span className="hidden items-center gap-1.5 font-plex text-[11px] text-smoke lg:flex">
-            {brand.chainLine.replace("On ", "")} · {brand.chainId}
+            {chains[ACTIVE_CHAIN_ID].name} · {ACTIVE_CHAIN_ID}
           </span>
           <span className="hidden md:inline-flex">
             <LatencyChip />
           </span>
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setNote((v) => !v)}
-              aria-expanded={note}
-              className="h-9 whitespace-nowrap rounded-[4px] bg-dawn px-3 font-inter text-[13.5px] text-void hover:bg-dawn-hi sm:px-4"
-            >
-              <span className="sm:hidden">Connect</span>
-              <span className="hidden sm:inline">{appUi.connect}</span>
-            </button>
-            {note ? (
-              <div role="status" className="absolute right-0 top-11 w-64 rounded-[6px] border border-white/10 bg-char-2 p-3 font-inter text-[12.5px] leading-relaxed text-haze shadow-[0_20px_50px_-20px_rgba(0,0,0,0.9)]">
-                {appUi.connectNote}
-              </div>
-            ) : null}
-          </div>
+          <WalletButton />
         </div>
       </div>
       <div className="border-t border-white/[0.05] bg-char/60">

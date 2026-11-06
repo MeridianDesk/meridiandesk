@@ -294,6 +294,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Contract addresses — just above the footer, verifiable on Blockscout */}
+        <ContractAddresses className={`${wrap} pb-10 pt-20 md:pt-24`} />
       </main>
 
       {/* 8 · FOOTER — char, closes on an interactive terrain */}
@@ -337,9 +340,6 @@ export default function Home() {
             <div className="space-y-3 text-[12px] leading-relaxed text-smoke md:col-span-3">
               <p>{legal.affiliation}</p>
               <p>{legal.disclaimer}</p>
-            </div>
-            <div className="md:col-span-12">
-              <ContractAddresses />
             </div>
           </div>
         </WaveStage>

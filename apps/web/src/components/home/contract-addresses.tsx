@@ -28,14 +28,14 @@ function Addr({ chainId, a, external }: { chainId: ChainId; a: `0x${string}` | n
   );
 }
 
-export function ContractAddresses() {
+export function ContractAddresses({ className = "" }: { className?: string }) {
   return (
-    <section aria-labelledby="contracts-h" className="border-t border-white/[0.08] pt-8">
+    <section id="contracts" aria-labelledby="contracts-h" className={className}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 id="contracts-h" className="text-[13px] text-smoke">{contractFooter.title}</h3>
+        <h2 id="contracts-h" className="font-zal text-[22px] font-medium tracking-[-0.03em] text-ivory md:text-[26px]">{contractFooter.title}</h2>
         <p className="font-plex text-[11px] text-smoke">{contractFooter.note}</p>
       </div>
-      <div className="mt-5 overflow-x-auto">
+      <div className="mt-6 overflow-x-auto rounded-[10px] border border-white/10 bg-char/60 px-5 pt-4 md:px-6">
         <table className="w-full min-w-[560px] text-left">
           <thead>
             <tr className="font-inter text-[11.5px] text-smoke">
@@ -47,7 +47,7 @@ export function ContractAddresses() {
           </thead>
           <tbody>
             {contractList.map((c) => (
-              <tr key={c.key} className="border-t border-white/[0.06]">
+              <tr key={c.key} className="border-t border-white/[0.06] last:[&>*]:pb-4">
                 <th scope="row" className="py-2.5 pr-6 font-normal">
                   <span className="block text-[13px] text-ivory/90">{c.key === "usdg" ? "USDG" : c.key}</span>
                   <span className="block text-[11.5px] text-smoke">{c.role}</span>
