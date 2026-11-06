@@ -75,19 +75,19 @@ export function ParticleWave({
     const COLS = Math.round(200 * density);
     const ROWS = Math.round(50 * density);
 
-    // light: periwinkle troughs → cobalt crests → ink-blue peaks
-    // dark:  deep cobalt troughs → bright cobalt → near-white crests
+    // light (hero): ember troughs → champagne crests → ivory peaks
+    // dark (footer): dimmer ember → deep champagne → pale crests
     const ramp: [number, number, number][] =
       tone === "light"
         ? [
-            [168, 180, 255],
-            [31, 59, 255],
-            [14, 26, 150],
+            [70, 52, 34],
+            [240, 196, 142],
+            [255, 243, 226],
           ]
         : [
-            [26, 44, 170],
-            [74, 104, 255],
-            [228, 233, 255],
+            [52, 40, 28],
+            [201, 143, 85],
+            [255, 231, 196],
           ];
     const col = (k: number) => {
       const [a, b, c] = ramp;
@@ -98,7 +98,7 @@ export function ParticleWave({
       const q = (k - 0.6) / 0.4;
       return [b[0] + (c[0] - b[0]) * q, b[1] + (c[1] - b[1]) * q, b[2] + (c[2] - b[2]) * q];
     };
-    const alphaBase = tone === "light" ? 0.1 : 0.06;
+    const alphaBase = tone === "light" ? 0.07 : 0.05;
 
     const draw = (t: number) => {
       ctx.clearRect(0, 0, w, h);

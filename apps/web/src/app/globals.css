@@ -40,6 +40,8 @@
   --color-haze: #9b978f;
   --color-dawn: #f0c48e;
   --color-dawn-hi: #ffe7c4;
+  --color-dawn-deep: #c98f55;
+  --color-smoke: #6e6b65;
   --font-funnel: var(--font-funnel-display);
   --font-funnel-sans: var(--font-funnel-sans);
   --font-plex: var(--font-ibm-plex-mono);
@@ -72,8 +74,8 @@ html {
 }
 
 body {
-  background: var(--color-snow);
-  color: var(--color-graphite);
+  background: var(--color-void);
+  color: var(--color-ivory);
   font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -82,8 +84,8 @@ body {
 }
 
 ::selection {
-  background: var(--color-cobalt);
-  color: #fff;
+  background: var(--color-dawn);
+  color: var(--color-void);
 }
 
 /* Hard-framed slab: border + offset solid shadow, no blur/glass */
@@ -123,7 +125,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-cobalt);
+  outline: 2px solid var(--color-dawn);
   outline-offset: 3px;
 }
 
@@ -133,7 +135,7 @@ body {
 .v-marquee-rev { animation-direction: reverse; }
 @media (prefers-reduced-motion: reduce) { .v-marquee { animation: none; } }
 .v-grad-text {
-  background: linear-gradient(90deg, #1f3bff 0%, #3f63ff 50%, #6f95ff 100%);
+  background: linear-gradient(90deg, #ffe7c4 0%, #f0c48e 45%, #c98f55 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 
@@ -147,7 +149,7 @@ body {
 .tilt-glare {
   position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
   opacity: var(--go, 0);
-  background: radial-gradient(520px circle at var(--gx, 50%) var(--gy, 50%), var(--glare, rgba(31, 59, 255, 0.09)), transparent 45%);
+  background: radial-gradient(520px circle at var(--gx, 50%) var(--gy, 50%), var(--glare, rgba(240, 196, 142, 0.08)), transparent 45%);
 }
 .z-pop-1 { transform: translateZ(22px); }
 .z-pop-2 { transform: translateZ(44px); }

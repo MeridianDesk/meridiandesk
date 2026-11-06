@@ -22,7 +22,7 @@ export function DeskTicket({ initial = "perps" }: { initial?: Desk }) {
       aria-selected={desk === d}
       onClick={() => setDesk(d)}
       className={`h-9 flex-1 rounded-[4px] font-inter text-[13.5px] ${
-        desk === d ? "bg-white text-graphite shadow-[0_1px_3px_rgba(11,14,18,0.12)]" : "text-slate hover:text-graphite"
+        desk === d ? "bg-white/10 text-ivory" : "text-haze hover:text-ivory"
       }`}
     >
       {label}
@@ -31,21 +31,21 @@ export function DeskTicket({ initial = "perps" }: { initial?: Desk }) {
   const pill = (on: boolean, strong: "cobalt" | "graphite") =>
     on
       ? strong === "cobalt"
-        ? "border-cobalt bg-cobalt text-white"
-        : "border-graphite bg-graphite text-snow"
-      : "border-line text-slate hover:border-graphite hover:text-graphite";
+        ? "border-dawn bg-dawn text-void"
+        : "border-ivory bg-ivory text-void"
+      : "border-white/10 text-haze hover:border-white/40 hover:text-ivory";
 
   return (
-    <div className="w-full rounded-[10px] border border-line bg-white p-4 shadow-[0_40px_90px_-40px_rgba(31,59,255,0.45)]">
+    <div className="w-full rounded-[10px] border border-white/10 bg-char p-4 shadow-[0_40px_90px_-40px_rgba(240,196,142,0.18)]">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="font-zal text-[15px] font-medium text-graphite">NVDA</span>
-          <span className="font-inter text-[12px] text-ash">NVIDIA · Stock Token</span>
+          <span className="font-zal text-[15px] font-medium text-ivory">NVDA</span>
+          <span className="font-inter text-[12px] text-smoke">NVIDIA · Stock Token</span>
         </div>
-        <span className="rounded-[3px] border border-line px-2 py-0.5 font-plex text-[10px] uppercase tracking-[0.12em] text-ash">Illustrative</span>
+        <span className="rounded-[3px] border border-white/10 px-2 py-0.5 font-plex text-[10px] uppercase tracking-[0.12em] text-smoke">Illustrative</span>
       </div>
 
-      <div role="tablist" aria-label="Desk" className="flex gap-1 rounded-[6px] bg-mist p-1">
+      <div role="tablist" aria-label="Desk" className="flex gap-1 rounded-[6px] bg-char-2 p-1">
         {tab("perps", "Perps")}
         {tab("options", "Options")}
       </div>
@@ -67,8 +67,8 @@ export function DeskTicket({ initial = "perps" }: { initial?: Desk }) {
           </div>
           <div>
             <div className="mb-2 flex items-center justify-between font-inter text-[12px]">
-              <span className="text-slate">Leverage</span>
-              <span className="text-ash">{app.leverageHelper}</span>
+              <span className="text-haze">Leverage</span>
+              <span className="text-smoke">{app.leverageHelper}</span>
             </div>
             <div role="radiogroup" aria-label="Leverage" className="grid grid-cols-4 gap-1.5">
               {app.leverageOptions.map((l) => (
@@ -102,17 +102,17 @@ export function DeskTicket({ initial = "perps" }: { initial?: Desk }) {
               </button>
             ))}
           </div>
-          <div className="rounded-[6px] border border-dashed border-line px-3 py-4 text-center font-inter text-[12.5px] text-ash">{app.optionsEmpty}</div>
+          <div className="rounded-[6px] border border-dashed border-white/10 px-3 py-4 text-center font-inter text-[12.5px] text-smoke">{app.optionsEmpty}</div>
           <Rows rows={[["Style", "European, cash-settled"], ["Premium", "USDG"], ["Expiry", "Preset ladder"]]} />
         </div>
       )}
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 border-t border-line pt-3">
-        <span className="inline-flex items-center gap-2 font-plex text-[11px] text-slate">
-          <span className="size-1.5 rounded-full bg-cobalt" aria-hidden="true" />
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 border-t border-white/10 pt-3">
+        <span className="inline-flex items-center gap-2 font-plex text-[11px] text-haze">
+          <span className="size-1.5 rounded-full bg-dawn" aria-hidden="true" />
           {app.softConfirm} · Confirm ~ms
         </span>
-        <span className="font-inter text-[11px] text-ash">{app.liqWarning}</span>
+        <span className="font-inter text-[11px] text-smoke">{app.liqWarning}</span>
       </div>
     </div>
   );
@@ -123,8 +123,8 @@ function Rows({ rows }: { rows: [string, string][] }) {
     <dl className="space-y-2 font-inter text-[12.5px]">
       {rows.map(([k, v]) => (
         <div key={k} className="flex justify-between">
-          <dt className="text-ash">{k}</dt>
-          <dd className="font-plex text-graphite">{v}</dd>
+          <dt className="text-smoke">{k}</dt>
+          <dd className="font-plex text-ivory">{v}</dd>
         </div>
       ))}
     </dl>
