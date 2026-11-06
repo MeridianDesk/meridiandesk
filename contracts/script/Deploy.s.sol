@@ -17,8 +17,11 @@ import {OptionsEngine} from "../src/OptionsEngine.sol";
 ///
 ///   forge script script/Deploy.s.sol --rpc-url robinhood_testnet --broadcast --verify
 contract Deploy is Script {
-    function run() external {
-        address usdg = vm.envAddress("USDG");
+    function run() external virtual {
+        _deploy(vm.envAddress("USDG"));
+    }
+
+    function _deploy(address usdg) internal {
         address admin = vm.envAddress("ADMIN");
         address guardian = vm.envOr("GUARDIAN", address(0));
         address quoter = vm.envOr("QUOTER", address(0));
