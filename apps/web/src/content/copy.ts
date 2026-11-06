@@ -185,6 +185,38 @@ export const wallet = {
   disconnect: "Disconnect",
 } as const;
 
+/** Draft copy — testnet trading (46630). */
+export const testnetDesk = {
+  badge: "Testnet",
+  illustrative: "Illustrative · testnet mirror of the mainnet Chainlink feed, refreshed manually",
+  updated: (ago: string) => `Updated ${ago} ago`,
+  stale: "Oracle price is stale — opens and closes are blocked until it refreshes.",
+  faucet: "Get 1,000 test USDG",
+  faucetNote: "Test token — no value",
+  connectToTrade: "Connect a wallet to trade on testnet.",
+  wrongChain: "Switch your wallet to Robinhood Chain Testnet to trade.",
+  approve: "Approve test USDG",
+  approving: "Approving…",
+  sending: "Confirm in wallet…",
+  range: (min: string, max: string) => `Collateral ${min}–${max} USDG per position`,
+  sizeLabel: "Collateral",
+  notional: "Position size",
+  noPositions: "No open Perps positions.",
+  close: "Close",
+  closing: "Closing…",
+  openedTitle: "Position opened",
+  closedTitle: "Position closed",
+  poolTitle: "Liquidity pool",
+  poolNote: "Shared test-USDG pool. It is the counterparty to every Perps and Options trade, so LPs can lose money when traders win.",
+  deposit: "Deposit",
+  withdrawAll: "Withdraw all",
+  yourShare: "Your deposit",
+  poolAssets: "Pool assets",
+  freeLiquidity: "Free liquidity",
+  utilization: "Utilization",
+  failed: "Transaction failed.",
+} as const;
+
 /** Draft copy — tx success popup. */
 export const txReceipt = {
   title: "Transaction confirmed",
@@ -204,6 +236,8 @@ export const contractFooter = {
   notDeployed: "Not deployed",
   copy: "Copy",
   copied: "Copied",
+  // Draft copy
+  testUsdg: "Test token — no value, testnet only",
 } as const;
 
 export const legal = {

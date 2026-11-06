@@ -1,0 +1,24 @@
+{
+  "AMZN": {
+    "feed": "0x264b38A9CA115b2ad58a5E71a8CCEb9B969A8fEb",
+    "name": "Amazon",
+    "perps": true,
+    "sourceFeed": "0xD5a1508ceD74c084eBf3cBe853e2C968fB2a651C",
+    "token": "0x5884aD2f920c162CFBbACc88C9C51AA75eC09E02"
+  },
+  "NFLX": {
+    "feed": "0x0000000000000000000000000000000000000000",
+    "name": "Netflix",
+    "perps": false,
+    "sourceFeed": "0x0000000000000000000000000000000000000000",
+    "token": "0x3b8262A63d25f0477c4DDE23F83cfe22Cb768C93"
+  },
+  "TSLA": {
+    "feed": "0xD71a594F553DBe2c03d2e1Bac3709ac6BB5E7a0C",
+    "name": "Tesla",
+    "perps": true,
+    "sourceFeed": "0x4A1166a659A55625345e9515b32adECea5547C38",
+    "token": "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E"
+  },
+  "chainId": 46630
+}

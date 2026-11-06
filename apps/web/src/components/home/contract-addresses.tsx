@@ -53,7 +53,12 @@ export function ContractAddresses({ className = "" }: { className?: string }) {
                   <span className="block text-[11.5px] text-smoke">{c.role}</span>
                 </th>
                 {NETS.map((id) => (
-                  <td key={id} className="py-2.5 pr-6"><Addr chainId={id} a={deployed(id, c.key)} external={c.key === "usdg"} /></td>
+                  <td key={id} className="py-2.5 pr-6">
+                    <Addr chainId={id} a={deployed(id, c.key)} external={c.key === "usdg"} />
+                    {c.key === "usdg" && id === 46630 && deployed(id, c.key) && (
+                      <span className="mt-0.5 block font-inter text-[11px] text-smoke">{contractFooter.testUsdg}</span>
+                    )}
+                  </td>
                 ))}
               </tr>
             ))}

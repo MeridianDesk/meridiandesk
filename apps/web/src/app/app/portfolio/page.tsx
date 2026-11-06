@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { appUi } from "@/content/copy";
+import { LivePositions, PoolPanel } from "@/components/desk/live";
 
 export const metadata = { title: "Portfolio — Meridian Desk" };
 
@@ -18,6 +19,7 @@ function Block({ title, desk }: { title: string; desk: "perps" | "options" }) {
           </div>
         ))}
       </dl>
+      {desk === "perps" ? <LivePositions /> : null}
       <p className="px-5 py-6 font-inter text-[13px] text-haze">{appUi.portfolioEmpty}</p>
     </section>
   );
@@ -32,6 +34,7 @@ export default function Portfolio() {
       </div>
       <Block title="Perps" desk="perps" />
       <Block title="Options" desk="options" />
+      <PoolPanel />
     </div>
   );
 }

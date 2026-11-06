@@ -1,4 +1,5 @@
-import { chains } from "./chain";
+import { ACTIVE_CHAIN_ID, chains } from "./chain";
+import { listed } from "./deployments";
 
 /**
  * MarketRegistry v0 — the FULL support catalog (brief §11). Dashboard renders 100% of it.
@@ -244,8 +245,14 @@ const RAW: [string, string, Sector, string, string | null][] = [
   ["ZS", "Zscaler", "Software & Internet", "0x7dc013eb55e436f30d7ed1afe4e36d6e45e3c3f7", null],
 ];
 
-/** Engines are pre-testnet: nothing is "live". Oracle-backed rows are "coming-soon". */
+/**
+ * Perps is "live" only where the market is actually listed + enabled on the active chain
+ * (deployments.json, synced from SetupTestnet). Everything else stays coming-soon / oracle-unavailable.
+ * Options engine is not enabled on any chain yet.
+ */
 const statusFor = (oracle: string | null): DeskStatus => (oracle ? "coming-soon" : "oracle-unavailable");
+const perpsStatus = (symbol: string, oracle: string | null): DeskStatus =>
+  listed(ACTIVE_CHAIN_ID, symbol)?.perps ? "live" : statusFor(oracle);
 
 export const registry: Market[] = RAW.map(([symbol, name, sector, address, oracle]) => ({
   symbol,
@@ -254,7 +261,7 @@ export const registry: Market[] = RAW.map(([symbol, name, sector, address, oracl
   address: address as `0x${string}`,
   oracle: oracle as `0x${string}` | null,
   featured: FEATURED.has(symbol),
-  perps: statusFor(oracle),
+  perps: perpsStatus(symbol, oracle),
   options: statusFor(oracle),
 }));
 
