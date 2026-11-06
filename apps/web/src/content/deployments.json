@@ -6,6 +6,26 @@
     "LiquidityPool": "0xCcE78f31A7e4743D3EB50E46717416951099283B",
     "PerpsEngine": "0x2d913431a534911Bd04A2eaDb72c62dAE3eDfaE6",
     "OptionsEngine": "0xA108a068e45b86083470f33AC3b8323aaD067360",
-    "usdg": "0xab4A7a4A00a0B1392b89E3d378EF2cc661BCB9f6"
+    "usdg": "0xab4A7a4A00a0B1392b89E3d378EF2cc661BCB9f6",
+    "markets": {
+      "AMZN": {
+        "token": "0x5884aD2f920c162CFBbACc88C9C51AA75eC09E02",
+        "feed": "0x264b38A9CA115b2ad58a5E71a8CCEb9B969A8fEb",
+        "sourceFeed": "0xD5a1508ceD74c084eBf3cBe853e2C968fB2a651C",
+        "perps": true
+      },
+      "NFLX": {
+        "token": "0x3b8262A63d25f0477c4DDE23F83cfe22Cb768C93",
+        "feed": null,
+        "sourceFeed": null,
+        "perps": false
+      },
+      "TSLA": {
+        "token": "0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E",
+        "feed": "0xD71a594F553DBe2c03d2e1Bac3709ac6BB5E7a0C",
+        "sourceFeed": "0x4A1166a659A55625345e9515b32adECea5547C38",
+        "perps": true
+      }
+    }
   }
 }
