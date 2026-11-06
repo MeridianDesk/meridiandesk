@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+
+# env / secrets (each app keeps its own .env* ignored too)
+.env
+.env.*
+!.env.example
+
+# stray root lockfile from running npm i at repo root — install inside apps/web instead
+/package-lock.json
+/node_modules/

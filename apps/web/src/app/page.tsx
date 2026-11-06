@@ -43,7 +43,7 @@ export default function Home() {
                 <div className="mt-8 flex flex-wrap items-center gap-3">
                   <PrimaryBtn href={APP}>{hero.primaryCta}</PrimaryBtn>
                   <GhostBtn href="#markets">{hero.secondaryCta}</GhostBtn>
-                  <span className="ml-1 rounded-[3px] bg-void/80 px-2 py-1 font-plex text-[11px] uppercase tracking-[0.14em] text-haze">{hero.microLine}</span>
+                  {/* <span className="ml-1 rounded-[3px] bg-void/80 px-2 py-1 font-plex text-[11px] uppercase tracking-[0.14em] text-haze">{hero.microLine}</span> */}
                 </div>
               </div>
 
