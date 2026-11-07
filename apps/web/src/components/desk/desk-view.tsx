@@ -13,6 +13,8 @@ import { LiveMark, LivePerpsTicket, LivePositions, useMarketStats } from "./live
 import { ago, fmtPx, fmtUsd, useOraclePrice } from "@/lib/onchain";
 import { change24h, usePriceHistory } from "@/lib/price-history";
 import { PriceChart } from "./price-chart";
+import { TvChart } from "./tv-chart";
+import { TV_SYMBOLS } from "@/content/tv-symbols";
 
 /** Market header + chart placeholder. Every oracle-derived value is an em dash until feeds connect. */
 function MarkStat({ lm }: { lm: ListedMarket }) {
@@ -43,7 +45,7 @@ function OiStat({ lm }: { lm: ListedMarket }) {
 
 function MarketPanel({ m, desk, lm }: { m: Market; desk: Desk; lm: ListedMarket | null }) {
   return (
-    <section aria-label={`${m.symbol} market`} className="flex min-h-0 flex-col">
+    <section aria-label={`${m.symbol} market`} className="flex shrink-0 flex-col">
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-white/[0.07] px-5 py-4">
         <div className="flex items-center gap-3">
           <Glyph m={m} size={36} />
@@ -66,7 +68,7 @@ function MarketPanel({ m, desk, lm }: { m: Market; desk: Desk; lm: ListedMarket 
         <div className="ml-auto"><StatusBadge status={m[desk]} /></div>
       </div>
 
-      <div className="relative flex min-h-[260px] flex-1 items-center justify-center overflow-hidden border-b border-white/[0.07]">
+      <div className="relative flex h-[420px] shrink-0 items-center justify-center overflow-hidden border-b border-white/[0.07]">
         <svg className="absolute inset-0 h-full w-full" aria-hidden="true">
           <defs>
             <pattern id="grid" width="56" height="44" patternUnits="userSpaceOnUse">
@@ -82,6 +84,10 @@ function MarketPanel({ m, desk, lm }: { m: Market; desk: Desk; lm: ListedMarket 
           </div>
         ) : lm ? (
           <LiveMark lm={lm} />
+        ) : TV_SYMBOLS[m.symbol] ? (
+          <div className="relative h-full w-full">
+            <TvChart symbol={m.symbol} tv={TV_SYMBOLS[m.symbol]} />
+          </div>
         ) : (
           <div className="relative max-w-[360px] px-6 text-center">
             <p className="font-plex text-[11px] uppercase tracking-[0.14em] text-smoke">{chartUi.noFeedTitle}</p>
@@ -118,7 +124,7 @@ function MarketPanel({ m, desk, lm }: { m: Market; desk: Desk; lm: ListedMarket 
 
 function Positions({ desk, live }: { desk: Desk; live: boolean }) {
   return (
-    <section aria-label="Positions" className="border-t border-white/[0.07]">
+    <section aria-label="Positions" className="shrink-0 border-t border-white/[0.07]">
       <div className="flex gap-5 border-b border-white/[0.07] px-5 font-inter text-[13px]">
         <span className="border-b-2 border-dawn py-2.5 text-ivory">{desk === "perps" ? "Perps positions" : "Options positions"}</span>
         <span className="py-2.5 text-haze">Orders</span>

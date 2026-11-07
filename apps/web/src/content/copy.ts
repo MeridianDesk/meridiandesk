@@ -218,6 +218,12 @@ export const chartUi = {
   loading: "Loading oracle history…",
   unavailable: "Oracle history unavailable",
   source: (n: number) => `Source: Chainlink feed on Robinhood Chain mainnet, ${n} on-chain rounds grouped into candles. Oracle updates, not a trade tape. US equities trade 24/5 — expect flat weekends.`,
+  // Draft copy — TradingView underlying reference for no-feed markets
+  tvTitle: (tv: string) => `${tv} · Underlying share · Reference`,
+  tvBadge: "Not the token price",
+  tvNote: "Exchange price of the underlying share, shown for reference. It is not the Stock Token price and Meridian does not trade off it. Trading stays off until a Chainlink feed is live.",
+  tvCredit: "Chart by TradingView",
+  tvAria: (s: string, tv: string) => `${s} underlying reference chart, ${tv}, by TradingView`,
   noFeedTitle: "No Chainlink feed yet",
   noFeedBody: "This market has no Chainlink feed on Robinhood Chain yet, so there is no oracle price or chart. Trading stays off until a feed is live.",
   aria: (s: string, n: number) => `${s} oracle price, ${n} Chainlink rounds`,
