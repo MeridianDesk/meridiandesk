@@ -51,11 +51,6 @@ export function AppHeader() {
           <WalletButton />
         </div>
       </div>
-      <div className="border-t border-white/[0.05] bg-char/60">
-        <p className="mx-auto max-w-[1480px] px-4 py-1.5 font-plex text-[10.5px] uppercase tracking-[0.1em] text-smoke md:px-6">
-          Guarded launch · max leverage 2× · not investment advice
-        </p>
-      </div>
     </header>
   );
 }

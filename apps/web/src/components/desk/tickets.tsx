@@ -28,9 +28,6 @@ function Submit({ label, m }: { label: string; m: Market | null }) {
       >
         {m ? `${label} · ${appUi.preTestnet}` : appUi.preTestnet}
       </button>
-      <p id="pretestnet-note" className="font-inter text-[11.5px] leading-relaxed text-smoke">
-        {appUi.preTestnetNote}
-      </p>
     </div>
   );
 }

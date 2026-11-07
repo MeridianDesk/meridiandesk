@@ -124,7 +124,7 @@ export default function Home() {
         {/* 3 · FEATURED MARKETS */}
         <section id="markets" aria-labelledby="h-markets" className="border-y border-white/10 bg-char/60 py-28">
           <div className={`${wrap} flex flex-wrap items-end justify-between gap-6`}>
-            <SectionTitle kicker={<Kicker>Markets</Kicker>} title={<span id="h-markets">{markets.title}</span>} sub={markets.sub} />
+            <SectionTitle kicker={<Kicker>Markets</Kicker>} title={<span id="h-markets">{markets.title}</span>}  />
             <GhostBtn href={`${APP}/markets`}>
               {markets.link} <Arrow />
             </GhostBtn>
@@ -231,16 +231,6 @@ export default function Home() {
               </div>
 
               <p className="mt-16 font-plex text-[11px] uppercase tracking-[0.14em] text-haze">{execLive.flowTitle}</p>
-              <ol className="mt-5 grid gap-px overflow-hidden rounded-[10px] border border-white/[0.08] bg-white/[0.08] sm:grid-cols-2 lg:grid-cols-4">
-                {execLive.flow.map((f) => (
-                  <li key={f.k} className="bg-char p-6">
-                    <span className="font-plex text-[12px] text-dawn">{f.k}</span>
-                    <div className="mt-3 font-zal text-[22px] font-semibold tracking-[-0.02em]">{f.title}</div>
-                    <p className="mt-2 text-[14px] leading-relaxed text-haze">{f.body}</p>
-                  </li>
-                ))}
-              </ol>
-              <p className="mt-8 max-w-[820px] text-[12px] leading-relaxed text-smoke">{execLive.footnote}</p>
             </div>
           </div>
         </section>
@@ -276,14 +266,6 @@ export default function Home() {
                 </h2>
                 <p className="mt-4 font-plex text-[11.5px] text-smoke">{risk.footnote}</p>
               </div>
-              <ul className="space-y-5">
-                {risk.body.map((b, i) => (
-                  <li key={i} className="flex gap-4 text-[15px] leading-relaxed text-haze">
-                    <span className="mt-2 size-1.5 shrink-0 rounded-full bg-dawn" aria-hidden="true" />
-                    <span className={i === 1 ? "text-ivory" : ""}>{b}</span>
-                  </li>
-                ))}
-              </ul>
             </Card>
           </Reveal3D>
         </section>
