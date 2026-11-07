@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { brand, desks, hero, how, latency, legal, manifesto, markets, proof, risk, why } from "@/content/copy";
+import { brand, desks, execLive, hero, how, latency, legal, manifesto, markets, proof, risk, why } from "@/content/copy";
 import { clusters, featured } from "@/content/featured";
 import { OptionsArt, PerpsArt } from "@/components/home/desk-art";
+import { LiveExecution } from "@/components/home/live-execution";
 import { ContractAddresses } from "@/components/home/contract-addresses";
 import { DeskTicket } from "@/components/home/desk-ticket";
 import { VNav } from "@/components/home/nav";
@@ -193,42 +194,53 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 5 · EXECUTION / LATENCY — char band */}
+        {/* 5 · DENIM-GRADE EXECUTION — heavy band (benchmark framing; see legal.affiliation) */}
         <section aria-labelledby="h-lat" className="p-2 md:p-3">
-          <div className="relative isolate overflow-hidden rounded-[10px] border border-white/[0.08] bg-char py-24 text-ivory md:py-32">
-            <div aria-hidden="true" className="absolute -left-40 -top-40 -z-10 size-[560px] rounded-full bg-dawn/10 blur-[120px]" />
-            <div className={`${wrap} grid gap-14 lg:grid-cols-[1fr_1.1fr] lg:items-center`}>
-              <SectionTitle dark kicker={<Kicker dark>Denim-grade execution</Kicker>} title={<span id="h-lat">{latency.title}</span>} sub={latency.sub} />
-              <Reveal3D>
-                <Tilt3D max={5}>
-                  <Card dark className="p-2 [--glare:rgba(240,196,142,0.1)]">
-                    <ul className="divide-y divide-white/[0.07]">
-                      {latency.rows.map((r) => (
-                        <li key={r.label} className="grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-3 px-5 py-5">
-                          <div>
-                            <div className="text-[15px]">{r.label}</div>
-                            <div className="mt-0.5 font-plex text-[11px] text-smoke">{r.note}</div>
-                          </div>
-                          <div className="font-zal text-[24px] font-medium tracking-[-0.02em]">{r.value}</div>
-                          <div className="col-span-2 h-[3px] overflow-hidden rounded-full bg-white/[0.08]">
-                            <div className="h-full rounded-full bg-gradient-to-r from-dawn-deep to-dawn-hi" style={{ width: `${(Math.log10(r.ms) / Math.log10(2000)) * 100}%` }} />
-                          </div>
-                        </li>
-                      ))}
-                      <li className="z-pop-1 grid grid-cols-[1fr_auto] items-center gap-6 rounded-[6px] bg-dawn/10 px-5 py-5">
-                        <div>
-                          <div className="text-[15px]">{latency.meridianRow.label}</div>
-                          <div className="mt-0.5 font-plex text-[11px] text-smoke">{latency.meridianRow.note}</div>
+          <div className="relative isolate overflow-hidden rounded-[10px] border border-dawn/20 bg-[radial-gradient(80%_60%_at_15%_0%,#2a1f14_0%,#0c0c0d_55%)] py-24 text-ivory md:py-36">
+            <div aria-hidden="true" className="absolute -right-40 top-1/3 -z-10 size-[640px] rounded-full bg-dawn/10 blur-[140px]" />
+            <div className={wrap}>
+              <Kicker dark>{execLive.kicker}</Kicker>
+              <h2 id="h-lat" className="mt-5 max-w-[1000px] font-zal text-[40px] font-semibold leading-[1.02] tracking-[-0.035em] md:text-[64px] lg:text-[80px]">
+                {execLive.title}
+                <br />
+                <span className="v-grad-text">{execLive.titleB}</span>
+              </h2>
+              <p className="mt-7 max-w-[640px] text-[16.5px] leading-relaxed text-haze md:text-[18px]">{execLive.sub}</p>
+
+              <div className="mt-14 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+                <Reveal3D>
+                  <LiveExecution />
+                </Reveal3D>
+                <Card dark className="p-6">
+                  <p className="font-plex text-[11px] uppercase tracking-[0.14em] text-haze">{execLive.benchTitle}</p>
+                  <ul className="mt-5 space-y-5">
+                    {latency.rows.map((r) => (
+                      <li key={r.label}>
+                        <div className="flex items-baseline justify-between gap-4">
+                          <span className="text-[15px]">{r.label}</span>
+                          <span className="font-zal text-[24px] font-medium tracking-[-0.02em]">{r.value}</span>
                         </div>
-                        <span className="inline-flex items-center gap-2 rounded-[4px] border border-dawn/50 px-3 py-1.5 font-plex text-[12px] text-dawn-hi">
-                          <span className="size-1.5 rounded-full bg-dawn-hi" aria-hidden="true" />
-                          {latency.chip}
-                        </span>
+                        <div className="mt-2 h-[4px] overflow-hidden rounded-full bg-white/[0.08]">
+                          <div className="h-full rounded-full bg-gradient-to-r from-dawn-deep to-dawn-hi" style={{ width: `${(r.ms / 1500) * 100}%` }} />
+                        </div>
+                        <div className="mt-1 font-plex text-[11px] text-smoke">{r.note}</div>
                       </li>
-                    </ul>
-                  </Card>
-                </Tilt3D>
-              </Reveal3D>
+                    ))}
+                  </ul>
+                </Card>
+              </div>
+
+              <p className="mt-16 font-plex text-[11px] uppercase tracking-[0.14em] text-haze">{execLive.flowTitle}</p>
+              <ol className="mt-5 grid gap-px overflow-hidden rounded-[10px] border border-white/[0.08] bg-white/[0.08] sm:grid-cols-2 lg:grid-cols-4">
+                {execLive.flow.map((f) => (
+                  <li key={f.k} className="bg-char p-6">
+                    <span className="font-plex text-[12px] text-dawn">{f.k}</span>
+                    <div className="mt-3 font-zal text-[22px] font-semibold tracking-[-0.02em]">{f.title}</div>
+                    <p className="mt-2 text-[14px] leading-relaxed text-haze">{f.body}</p>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-8 max-w-[820px] text-[12px] leading-relaxed text-smoke">{execLive.footnote}</p>
             </div>
           </div>
         </section>

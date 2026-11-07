@@ -1,5 +1,6 @@
 "use client";
 
+import { chartUi } from "@/content/copy";
 import { useRouter } from "next/navigation";
 import { appUi, testnetDesk } from "@/content/copy";
 import { ACTIVE_CHAIN_ID, addressUrl } from "@/content/chain";
@@ -83,8 +84,8 @@ function MarketPanel({ m, desk, lm }: { m: Market; desk: Desk; lm: ListedMarket 
           <LiveMark lm={lm} />
         ) : (
           <div className="relative max-w-[360px] px-6 text-center">
-            <p className="font-plex text-[11px] uppercase tracking-[0.14em] text-smoke">{appUi.oracleStream}</p>
-            <p className="mt-2 font-inter text-[13px] leading-relaxed text-haze">{appUi.chartEmpty}</p>
+            <p className="font-plex text-[11px] uppercase tracking-[0.14em] text-smoke">{chartUi.noFeedTitle}</p>
+            <p className="mt-2 font-inter text-[13px] leading-relaxed text-haze">{chartUi.noFeedBody}</p>
           </div>
         )}
       </div>

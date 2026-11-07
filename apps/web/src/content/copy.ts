@@ -110,6 +110,30 @@ export const latency = {
   chip: "Confirm ~ms · live",
 } as const;
 
+// Draft copy — heavy "Denim-grade execution" section (benchmark framing only, no affiliation claim)
+export const execLive = {
+  kicker: "Denim-grade execution",
+  title: "Built to the Denim-grade bar.",
+  titleB: "Measured on Robinhood Chain.",
+  sub: "Base's Denim upgrade set a new bar for onchain speed: 200 ms blocks. Meridian holds itself to that bar on Robinhood Chain, where blocks land around every 100 ms. We don't ask you to trust the number. The meter below reads the chain live.",
+  meterTitle: "Robinhood Chain mainnet · live",
+  live: "Live",
+  offline: "RPC unavailable",
+  blockTime: "Avg block",
+  height: "Block height",
+  rtt: "RPC round-trip",
+  meterNote: "Read directly from a public Robinhood Chain RPC in your browser. Avg block = blocks produced since you opened this page. Round-trip depends on your network.",
+  flowTitle: "From click to receipt",
+  flow: [
+    { k: "01", title: "Sign", body: "One signature. Leverage, size and fees are fixed before you sign." },
+    { k: "02", title: "Soft-confirm", body: "The sequencer accepts the order in milliseconds. The ticket shows it at once." },
+    { k: "03", title: "Oracle mark", body: "Fill at the Chainlink mark, checked for staleness on-chain." },
+    { k: "04", title: "Receipt", body: "Final receipt with confirm time and an explorer link. Every order." },
+  ],
+  benchTitle: "Block time, side by side",
+  footnote: "Denim is a Base network upgrade. Meridian runs on Robinhood Chain, not Base, and is not affiliated with, endorsed by, or partnered with Base or Denim. \"Denim-grade\" describes our execution bar only.",
+} as const;
+
 export const how = {
   title: "How it works",
   steps: [
@@ -188,11 +212,14 @@ export const wallet = {
 /** Draft copy — testnet trading (46630). */
 // Draft copy — market chart (PM revision 2026-11-06)
 export const chartUi = {
-  title: (s: string) => `${s} / USD · Chainlink oracle · 7D`,
+  title: (s: string, span: string) => `${s} / USD · Chainlink oracle · ${span}`,
   lastRound: "Last round",
+  tfLabel: "Candle interval",
   loading: "Loading oracle history…",
   unavailable: "Oracle history unavailable",
-  source: (n: number) => `Source: Chainlink feed on Robinhood Chain mainnet, last ${n} on-chain rounds. Oracle updates, not a trade tape. US equities trade 24/5 — expect flat weekends.`,
+  source: (n: number) => `Source: Chainlink feed on Robinhood Chain mainnet, ${n} on-chain rounds grouped into candles. Oracle updates, not a trade tape. US equities trade 24/5 — expect flat weekends.`,
+  noFeedTitle: "No Chainlink feed yet",
+  noFeedBody: "This market has no Chainlink feed on Robinhood Chain yet, so there is no oracle price or chart. Trading stays off until a feed is live.",
   aria: (s: string, n: number) => `${s} oracle price, ${n} Chainlink rounds`,
 } as const;
 
