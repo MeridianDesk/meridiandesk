@@ -6,6 +6,7 @@ import { useAccount, useBalance, useConnect, useConnectors, useDisconnect, useRe
 import { appUi, wallet as w } from "@/content/copy";
 import { ACTIVE_CHAIN_ID, addressUrl, chains, shortHex } from "@/content/chain";
 import { deployed } from "@/content/deployments";
+import { rhMainnet, rhTestnet } from "@/lib/wagmi";
 
 const btn = "h-9 whitespace-nowrap rounded-[4px] px-3 font-inter text-[13.5px] sm:px-4";
 const fmt = (v: bigint, d: number, dp = 4) => {
@@ -141,9 +142,44 @@ const useMounted = () => useSyncExternalStore(noop, () => true, () => false);
 export function WalletButton() {
   const mounted = useMounted();
   const { address, chainId, connector, status } = useAccount();
-  const { switchChain, isPending: switching, error: switchError, reset } = useSwitchChain();
+  const { isPending: switching, error: switchError, reset } = useSwitchChain();
   const [dialog, setDialog] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [addErr, setAddErr] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+
+  /** switch → on any failure, add the chain with a reachable RPC (EIP-3085) → switch again. */
+  async function forceSwitch() {
+    reset(); setAddErr(null); setAdding(true);
+    const c = ACTIVE_CHAIN_ID === rhTestnet.id ? rhTestnet : rhMainnet;
+    const hex = `0x${ACTIVE_CHAIN_ID.toString(16)}`;
+    try {
+      const prov = (await connector?.getProvider()) as { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } | undefined;
+      if (!prov) throw new Error("Wallet provider not found");
+      try {
+        await prov.request({ method: "wallet_switchEthereumChain", params: [{ chainId: hex }] });
+      } catch (e) {
+        const code = (e as { code?: number }).code;
+        if (code === 4001) throw e; // user rejected
+        await prov.request({
+          method: "wallet_addEthereumChain",
+          params: [{
+            chainId: hex,
+            chainName: c.name,
+            nativeCurrency: c.nativeCurrency,
+            rpcUrls: [c.rpcUrls.default.http[0]],
+            blockExplorerUrls: c.blockExplorers ? [c.blockExplorers.default.url] : undefined,
+          }],
+        });
+        await prov.request({ method: "wallet_switchEthereumChain", params: [{ chainId: hex }] });
+      }
+    } catch (e) {
+      const x = e as { code?: number; message?: string };
+      setAddErr(`${x.code ?? ""} ${x.message ?? String(e)}`.trim());
+    } finally {
+      setAdding(false);
+    }
+  }
 
   if (!mounted || status !== "connected" || !address) {
     return (
@@ -161,12 +197,12 @@ export function WalletButton() {
     const phantom = /phantom/i.test(connector?.name ?? "") || connector?.id === "app.phantom";
     return (
       <div className="relative">
-        <button type="button" disabled={switching} onClick={() => { reset(); switchChain({ chainId: ACTIVE_CHAIN_ID }); }} className={`${btn} border border-dawn/60 text-dawn hover:bg-dawn hover:text-void disabled:opacity-60`}>
-          {switching ? w.confirmInWallet : `${w.switchTo} ${chains[ACTIVE_CHAIN_ID].short}`}
+        <button type="button" disabled={switching || adding} onClick={forceSwitch} className={`${btn} border border-dawn/60 text-dawn hover:bg-dawn hover:text-void disabled:opacity-60`}>
+          {switching || adding ? w.confirmInWallet : `${w.switchTo} ${chains[ACTIVE_CHAIN_ID].short}`}
         </button>
-        {switchError ? (
+        {switchError || addErr ? (
           <div role="alert" className="absolute right-0 top-11 z-40 w-72 rounded-[6px] border border-white/10 bg-char-2 p-3 font-inter text-[12.5px] leading-relaxed text-haze">
-            {phantom ? w.phantomUnsupported : `${w.switchFailed} ${"shortMessage" in switchError ? String(switchError.shortMessage) : ""}`}
+            {phantom ? w.phantomUnsupported : `${w.switchFailed} ${addErr ?? (switchError && "shortMessage" in switchError ? String(switchError.shortMessage) : "")}`}
           </div>
         ) : null}
       </div>

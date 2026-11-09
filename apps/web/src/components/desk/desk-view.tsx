@@ -1,6 +1,7 @@
 "use client";
 
 import { chartUi } from "@/content/copy";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { appUi, testnetDesk } from "@/content/copy";
 import { ACTIVE_CHAIN_ID, addressUrl } from "@/content/chain";
@@ -9,7 +10,7 @@ import { bySymbol, CHAIN_EXPLORER, registry, type Market } from "@/content/regis
 import { Glyph, Row, short, StatusBadge } from "./bits";
 import { Catalog, type Desk } from "./catalog";
 import { OptionsTicket, PerpsTicket, TicketHeader } from "./tickets";
-import { LiveMark, LivePerpsTicket, LivePositions, useMarketStats } from "./live";
+import { LiveHistory, LiveMark, LivePerpsTicket, LivePositions, useMarketStats } from "./live";
 import { ago, fmtPx, fmtUsd, useOraclePrice } from "@/lib/onchain";
 import { change24h, usePriceHistory } from "@/lib/price-history";
 import { PriceChart } from "./price-chart";
@@ -122,15 +123,27 @@ function MarketPanel({ m, desk, lm }: { m: Market; desk: Desk; lm: ListedMarket 
   );
 }
 
-function Positions({ desk, live }: { desk: Desk; live: boolean }) {
+function Positions({ desk, live, token, symbol }: { desk: Desk; live: boolean; token?: string | null; symbol: string }) {
+  const [tab, setTab] = useState<"positions" | "history">("positions");
+  const [scope, setScope] = useState<"market" | "all">("market");
+  const tabCls = (on: boolean) => `py-2.5 ${on ? "border-b-2 border-dawn text-ivory" : "text-haze hover:text-ivory"}`;
+  const filter = scope === "market" ? token : null;
   return (
     <section aria-label="Positions" className="shrink-0 border-t border-white/[0.07]">
-      <div className="flex gap-5 border-b border-white/[0.07] px-5 font-inter text-[13px]">
-        <span className="border-b-2 border-dawn py-2.5 text-ivory">{desk === "perps" ? "Perps positions" : "Options positions"}</span>
-        <span className="py-2.5 text-haze">Orders</span>
-        <span className="py-2.5 text-haze">History</span>
+      <div className="flex items-center gap-5 border-b border-white/[0.07] px-5 font-inter text-[13px]" role="tablist">
+        <button type="button" role="tab" aria-selected={tab === "positions"} className={tabCls(tab === "positions")} onClick={() => setTab("positions")}>{desk === "perps" ? "Perps positions" : "Options positions"}</button>
+        <button type="button" role="tab" aria-selected={tab === "history"} className={tabCls(tab === "history")} onClick={() => setTab("history")}>History</button>
+        {live ? (
+          <div className="ml-auto flex gap-1.5 py-1.5" role="group" aria-label="Scope">
+            {(["market", "all"] as const).map((k) => (
+              <button key={k} type="button" aria-pressed={scope === k} onClick={() => setScope(k)} className={`rounded-[4px] px-2 py-1 text-[12px] ${scope === k ? "bg-white/[0.08] text-ivory" : "text-haze hover:text-ivory"}`}>
+                {k === "market" ? symbol : "All markets"}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
-      {live ? <LivePositions /> : <p className="px-5 py-6 font-inter text-[13px] text-haze">{appUi.portfolioEmpty}</p>}
+      {!live ? <p className="px-5 py-6 font-inter text-[13px] text-haze">{appUi.portfolioEmpty}</p> : tab === "positions" ? <LivePositions token={filter} /> : <LiveHistory token={filter} />}
     </section>
   );
 }
@@ -151,7 +164,7 @@ export function DeskView({ desk, symbol }: { desk: Desk; symbol?: string }) {
       </div>
       <div className="order-1 flex min-h-0 flex-col overflow-y-auto lg:order-2">
         <MarketPanel m={m} desk={desk} lm={live ? lm : null} />
-        <Positions desk={desk} live={live} />
+        <Positions desk={desk} live={live} token={lm?.token} symbol={m.symbol} />
       </div>
       <aside aria-label="Order ticket" className="order-2 min-h-0 overflow-y-auto border-white/[0.07] lg:order-3 lg:border-l max-lg:border-t">
         <TicketHeader desk={desk} />

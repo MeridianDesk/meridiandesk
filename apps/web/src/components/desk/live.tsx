@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
-import { erc20Abi, maxUint256, parseUnits } from "viem";
-import { useReadContract, useReadContracts } from "wagmi";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { erc20Abi, maxUint256, parseAbiItem, parseUnits } from "viem";
+import { usePublicClient, useReadContract, useReadContracts } from "wagmi";
 import { app, testnetDesk as t } from "@/content/copy";
-import { ACTIVE_CHAIN_ID, addressUrl, chains } from "@/content/chain";
+import { ACTIVE_CHAIN_ID, addressUrl, chains, txUrl } from "@/content/chain";
 import { deployed, symbolOf, type ListedMarket } from "@/content/deployments";
 import { perpsAbi, poolAbi, testUsdgAbi } from "@/lib/abi";
 import { ago, fmtPx, fmtUsd, LEV_BPS, USDG_DEC, useOraclePrice, useReady, useSendTx } from "@/lib/onchain";
@@ -227,20 +227,29 @@ function PositionRow({ id, p }: { id: bigint; p: Pos }) {
   );
 }
 
-/** Open Perps positions of the connected wallet, read from PerpsEngine. */
-export function LivePositions() {
-  const mounted = useMounted();
-  const { address, connected, onChain } = useReady();
-  const ids = useReadContract({ address: PERPS ?? undefined, abi: perpsAbi, functionName: "positionsOf", args: address ? [address] : undefined, chainId: C, query: { enabled: !!PERPS && !!address && onChain } });
+/** The wallet's Perps position ids + structs (open and closed), read from PerpsEngine. */
+function useWalletPositions() {
+  const { address, onChain } = useReady();
+  const ids = useReadContract({ address: PERPS ?? undefined, abi: perpsAbi, functionName: "positionsOf", args: address ? [address] : undefined, chainId: C, query: { enabled: !!PERPS && !!address && onChain, refetchInterval: 15_000 } });
   const list = (ids.data ?? []) as readonly bigint[];
   const pos = useReadContracts({
     contracts: list.map((id) => ({ address: PERPS!, abi: perpsAbi, functionName: "getPosition" as const, args: [id] as const, chainId: C })),
-    query: { enabled: list.length > 0 },
+    query: { enabled: list.length > 0, refetchInterval: 15_000 },
   });
+  const all = list.map((id, i) => ({ id, p: pos.data?.[i]?.result as Pos | undefined })).filter((x): x is { id: bigint; p: Pos } => !!x.p);
+  return { all, loading: ids.isLoading || pos.isLoading };
+}
+
+const th = "px-3 py-2 text-right font-plex text-[10.5px] font-normal uppercase tracking-[0.08em] text-smoke";
+
+/** Open Perps positions of the connected wallet; `token` narrows to one market. */
+export function LivePositions({ token }: { token?: string | null }) {
+  const mounted = useMounted();
+  const { connected, onChain } = useReady();
+  const { all, loading } = useWalletPositions();
   if (!mounted || !connected || !onChain || !PERPS) return null;
-  const open = list.map((id, i) => ({ id, p: pos.data?.[i]?.result as Pos | undefined })).filter((x): x is { id: bigint; p: Pos } => !!x.p?.open).reverse();
-  if (!open.length) return <p className="px-5 py-6 font-inter text-[13px] text-haze">{ids.isLoading || pos.isLoading ? "—" : t.noPositions}</p>;
-  const th = "px-3 py-2 text-right font-plex text-[10.5px] font-normal uppercase tracking-[0.08em] text-smoke";
+  const open = all.filter((x) => x.p.open && (!token || x.p.token.toLowerCase() === token.toLowerCase())).reverse();
+  if (!open.length) return <p className="px-5 py-6 font-inter text-[13px] text-haze">{loading ? "—" : t.noPositions}</p>;
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -251,6 +260,118 @@ export function LivePositions() {
         </thead>
         <tbody>{open.map(({ id, p }) => <PositionRow key={String(id)} id={id} p={p} />)}</tbody>
       </table>
+    </div>
+  );
+}
+
+const evOpened = parseAbiItem("event PositionOpened(uint256 indexed id, address indexed owner, address indexed token, bool isLong, uint16 leverageBps, uint256 collateral, uint256 size, uint256 price, uint256 fee)");
+const evClosed = parseAbiItem("event PositionClosed(uint256 indexed id, address indexed owner, uint256 price, int256 pnl, uint256 funding, uint256 fee, uint256 paidOut)");
+const evLiq = parseAbiItem("event PositionLiquidated(uint256 indexed id, address indexed owner, address indexed keeper, uint256 price, int256 equity, uint256 keeperFee, uint256 paidOut)");
+const MAX_RANGE = 49_000n; // public RPC caps eth_getLogs at 50k blocks
+
+type HistRow = { kind: "Open" | "Close" | "Liquidated"; id: string; block: string; tx: string; price: string; pnl?: string; fee: string; paidOut?: string; collateral?: string };
+type HistCache = { from: string; to: string; rows: HistRow[] };
+
+/**
+ * Wallet trade history from PerpsEngine events. Scans only from the wallet's first position
+ * (estimated from openedAt) in 49k-block chunks, caching scanned range + rows in localStorage.
+ * Fine for testnet; mainnet should read from an indexer instead.
+ */
+function usePerpsHistory() {
+  const { address, onChain } = useReady();
+  const client = usePublicClient({ chainId: C });
+  const { all } = useWalletPositions();
+  const firstTs = all.length ? Number(all.reduce((m, x) => (x.p.openedAt < m ? x.p.openedAt : m), all[0].p.openedAt)) : 0;
+  const key = address ? `meridian.hist.${C}.${PERPS}.${address.toLowerCase()}` : null;
+  const [state, setState] = useState<{ key: string | null; rows: HistRow[]; scanning: boolean; error?: string }>({ key: null, rows: [], scanning: false });
+
+  useEffect(() => {
+    if (!client || !key || !address || !PERPS || !onChain || !firstTs) return;
+    let stop = false;
+    const run = async () => {
+      let cache: HistCache | null = null;
+      try { cache = JSON.parse(localStorage.getItem(key) ?? "null"); } catch {}
+      const latest = await client.getBlock();
+      const head = latest.number;
+      let from: bigint;
+      if (cache && BigInt(cache.to) < head) from = BigInt(cache.to) + 1n;
+      else if (cache) { setState({ key, rows: cache.rows, scanning: false }); return; }
+      else {
+        // estimate the block of the first open from timestamps, with a safety margin
+        const back = await client.getBlock({ blockNumber: head > 200_000n ? head - 200_000n : 0n });
+        const spb = Number(latest.timestamp - back.timestamp) / Number(head - back.number || 1n);
+        const est = head - BigInt(Math.ceil(((Number(latest.timestamp) - firstTs) / spb) * 1.1 + 2000));
+        from = est > 0n ? est : 0n;
+      }
+      let rows = cache?.rows ?? [];
+      setState({ key, rows, scanning: true });
+      const args = { owner: address };
+      for (let a = from; a <= head && !stop; a += MAX_RANGE + 1n) {
+        const b = a + MAX_RANGE > head ? head : a + MAX_RANGE;
+        const [o, c, l] = await Promise.all([
+          client.getLogs({ address: PERPS!, event: evOpened, args, fromBlock: a, toBlock: b }),
+          client.getLogs({ address: PERPS!, event: evClosed, args, fromBlock: a, toBlock: b }),
+          client.getLogs({ address: PERPS!, event: evLiq, args, fromBlock: a, toBlock: b }),
+        ]);
+        rows = rows.concat(
+          o.map((e) => ({ kind: "Open" as const, id: String(e.args.id), block: String(e.blockNumber), tx: e.transactionHash, price: String(e.args.price), fee: String(e.args.fee), collateral: String(e.args.collateral) })),
+          c.map((e) => ({ kind: "Close" as const, id: String(e.args.id), block: String(e.blockNumber), tx: e.transactionHash, price: String(e.args.price), pnl: String(e.args.pnl), fee: String(e.args.fee), paidOut: String(e.args.paidOut) })),
+          l.map((e) => ({ kind: "Liquidated" as const, id: String(e.args.id), block: String(e.blockNumber), tx: e.transactionHash, price: String(e.args.price), pnl: String(e.args.equity), fee: String(e.args.keeperFee), paidOut: String(e.args.paidOut) })),
+        );
+        const seen = new Set<string>();
+        rows = rows.filter((r) => { const k = r.tx + r.kind + r.id; if (seen.has(k)) return false; seen.add(k); return true; });
+        localStorage.setItem(key, JSON.stringify({ from: String(cache?.from ?? from), to: String(b), rows } satisfies HistCache));
+        if (!stop) setState({ key, rows, scanning: b < head });
+      }
+    };
+    run().catch((e) => !stop && setState((s) => ({ ...s, key, scanning: false, error: (e as { shortMessage?: string }).shortMessage ?? String(e) })));
+    const iv = setInterval(() => run().catch(() => {}), 30_000);
+    return () => { stop = true; clearInterval(iv); };
+  }, [client, key, address, onChain, firstTs]);
+
+  const byId = new Map(all.map((x) => [String(x.id), x.p]));
+  const rows = state.key === key ? state.rows : [];
+  return { rows: [...rows].sort((a, b) => Number(BigInt(b.block) - BigInt(a.block))), byId, scanning: state.scanning, error: state.error, hasPositions: all.length > 0 };
+}
+
+/** Open / close / liquidation events of the connected wallet; `token` narrows to one market. */
+export function LiveHistory({ token }: { token?: string | null }) {
+  const mounted = useMounted();
+  const { connected, onChain } = useReady();
+  const { rows, byId, scanning, error, hasPositions } = usePerpsHistory();
+  if (!mounted || !connected || !onChain || !PERPS) return null;
+  const list = rows.filter((r) => !token || byId.get(r.id)?.token.toLowerCase() === token.toLowerCase());
+  if (!list.length) return <p className="px-5 py-6 font-inter text-[13px] text-haze">{error ? `History unavailable: ${error}` : scanning ? "Loading history…" : hasPositions || !token ? t.noHistory : t.noHistory}</p>;
+  const td = "px-3 py-2.5 font-plex text-[12.5px] whitespace-nowrap";
+  const usd = (v?: string) => (v === undefined ? "—" : fmtUsd(BigInt(v)));
+  const signed = (v?: string) => { if (v === undefined) return "—"; const n = BigInt(v); return `${n >= 0n ? "+" : "−"}${fmtUsd(n >= 0n ? n : -n)}`; };
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full">
+        <thead>
+          <tr>
+            <th className={`${th} text-left`}>Market</th><th className={`${th} text-left`}>Event</th><th className={th}>Price</th><th className={th}>Collateral</th><th className={th}>PnL / equity</th><th className={th}>Fee</th><th className={th}>Paid out</th><th className={th}>Tx</th>
+          </tr>
+        </thead>
+        <tbody>
+          {list.map((r) => {
+            const p = byId.get(r.id);
+            return (
+              <tr key={r.tx + r.kind + r.id} className="border-t border-white/[0.05]">
+                <td className={`${td} text-ivory`}>{p ? symbolOf(C, p.token) ?? "—" : "—"} {p ? <span className={p.isLong ? "text-dawn" : "text-ivory/70"}>{p.isLong ? "Long" : "Short"}</span> : null} {p ? `${p.leverageBps / 10_000}×` : ""} <span className="text-smoke">#{r.id}</span></td>
+                <td className={`${td} ${r.kind === "Liquidated" ? "text-dawn" : "text-haze"}`}>{r.kind}</td>
+                <td className={`${td} text-right text-haze`}>{fmtPx(BigInt(r.price))}</td>
+                <td className={`${td} text-right text-haze`}>{usd(r.collateral)}</td>
+                <td className={`${td} text-right ${r.pnl === undefined ? "text-smoke" : BigInt(r.pnl) >= 0n ? "text-dawn" : "text-ivory/70"}`}>{signed(r.pnl)}</td>
+                <td className={`${td} text-right text-haze`}>{usd(r.fee)}</td>
+                <td className={`${td} text-right text-haze`}>{usd(r.paidOut)}</td>
+                <td className={`${td} text-right`}><a href={txUrl(r.tx)} target="_blank" rel="noreferrer" className="text-haze underline decoration-white/20 underline-offset-4 hover:text-ivory">{r.tx.slice(0, 8)}…</a></td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {scanning ? <p className="px-5 py-2 font-inter text-[11px] text-smoke">Loading older events…</p> : null}
     </div>
   );
 }

@@ -60,26 +60,12 @@ function SizeField({ id }: { id: string }) {
 export function PerpsTicket({ m }: { m: Market | null }) {
   const [side, setSide] = useState<"long" | "short">("long");
   const [lev, setLev] = useState<Lev>("1×");
-  const [type, setType] = useState<"market" | "limit">("market");
   return (
     <div className="space-y-4">
       <div className="flex gap-1.5" role="group" aria-label="Side">
         <button type="button" aria-pressed={side === "long"} className={seg(side === "long")} onClick={() => setSide("long")}>Long</button>
         <button type="button" aria-pressed={side === "short"} className={seg(side === "short", "ivory")} onClick={() => setSide("short")}>Short</button>
       </div>
-      <div className="flex gap-4 font-inter text-[13px]" role="group" aria-label="Order type">
-        {(["market", "limit"] as const).map((t) => (
-          <button key={t} type="button" aria-pressed={type === t} onClick={() => setType(t)} className={type === t ? "text-ivory underline decoration-dawn decoration-2 underline-offset-[6px]" : "text-haze hover:text-ivory"}>
-            {t === "market" ? "Market" : "Limit"}
-          </button>
-        ))}
-      </div>
-      {type === "limit" ? (
-        <div>
-          <label htmlFor="perps-limit" className="mb-1.5 block font-inter text-[12.5px] text-haze">Limit price</label>
-          <input id="perps-limit" inputMode="decimal" placeholder="—" className="h-10 w-full rounded-[4px] border border-white/10 bg-void px-3 font-plex text-[14px] text-ivory placeholder:text-smoke focus:border-dawn/60 focus:outline-none" />
-        </div>
-      ) : null}
       <SizeField id="perps-size" />
       <div>
         <div className="mb-1.5 flex justify-between font-inter text-[12.5px] text-haze">

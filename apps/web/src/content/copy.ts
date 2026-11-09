@@ -50,7 +50,7 @@ export const desks = {
     specs: [
       ["Leverage", "1× · 1.25× · 1.5× · 2×"],
       ["Margin", "USDG"],
-      ["Orders", "Market · Limit"],
+      ["Orders", "Market (oracle price)"],
       ["Mode", "Isolated (v1)"],
     ],
   },
@@ -245,6 +245,7 @@ export const testnetDesk = {
   sizeLabel: "Collateral",
   notional: "Position size",
   noPositions: "No open Perps positions.",
+  noHistory: "No Perps trades yet.",
   close: "Close",
   closing: "Closing…",
   openedTitle: "Position opened",
