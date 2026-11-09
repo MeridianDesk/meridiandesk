@@ -151,7 +151,7 @@ function Positions({ desk, live, token, symbol }: { desk: Desk; live: boolean; t
 
 export function DeskView({ desk, symbol }: { desk: Desk; symbol?: string }) {
   const router = useRouter();
-  const firstLive = registry.find((x) => x.perps === "live")?.symbol;
+  const firstLive = registry.find((x) => x[desk] === "live")?.symbol;
   const fallback = firstLive ?? "NVDA";
   const m = (symbol ? bySymbol(symbol) : undefined) ?? bySymbol(fallback) ?? registry[0];
   const lm = listed(ACTIVE_CHAIN_ID, m.symbol);

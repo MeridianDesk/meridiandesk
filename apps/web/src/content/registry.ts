@@ -1,5 +1,5 @@
 import { ACTIVE_CHAIN_ID, chains } from "./chain";
-import { listed } from "./deployments";
+import { deployed, listed } from "./deployments";
 
 /**
  * MarketRegistry v0 — the FULL support catalog (brief §11). Dashboard renders 100% of it.
@@ -248,11 +248,14 @@ const RAW: [string, string, Sector, string, string | null][] = [
 /**
  * Perps is "live" only where the market is actually listed + enabled on the active chain
  * (deployments.json, synced from SetupTestnet). Everything else stays coming-soon / oracle-unavailable.
- * Options engine is not enabled on any chain yet.
+ * Options is "live" where the market has a feed on the active chain and OptionsEngine is deployed;
+ * the ticket re-checks MarketRegistry.isOptionsEnabled on-chain before allowing a buy.
  */
 const statusFor = (oracle: string | null): DeskStatus => (oracle ? "coming-soon" : "oracle-unavailable");
 const perpsStatus = (symbol: string, oracle: string | null): DeskStatus =>
   listed(ACTIVE_CHAIN_ID, symbol)?.perps ? "live" : statusFor(oracle);
+const optionsStatus = (symbol: string, oracle: string | null): DeskStatus =>
+  listed(ACTIVE_CHAIN_ID, symbol)?.feed && deployed(ACTIVE_CHAIN_ID, "OptionsEngine") ? "live" : statusFor(oracle);
 
 export const registry: Market[] = RAW.map(([symbol, name, sector, address, oracle]) => ({
   symbol,
@@ -262,7 +265,7 @@ export const registry: Market[] = RAW.map(([symbol, name, sector, address, oracl
   oracle: oracle as `0x${string}` | null,
   featured: FEATURED.has(symbol),
   perps: perpsStatus(symbol, oracle),
-  options: statusFor(oracle),
+  options: optionsStatus(symbol, oracle),
 }));
 
 export const bySymbol = (s: string) => registry.find((m) => m.symbol.toLowerCase() === s.toLowerCase());
