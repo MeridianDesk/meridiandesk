@@ -21,6 +21,7 @@ const ROUTER = deployed(C, "OracleRouter");
 const REGISTRY = deployed(C, "MarketRegistry");
 const QUOTE_TTL = 60; // seconds
 
+
 const bad = (error: string, status = 400) => NextResponse.json({ error }, { status });
 
 export async function GET(req: Request) {
