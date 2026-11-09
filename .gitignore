@@ -9,3 +9,7 @@
 # stray root lockfile from running npm i at repo root — install inside apps/web instead
 /package-lock.json
 /node_modules/
+
+# keeper deps
+keeper/node_modules/
+node_modules/

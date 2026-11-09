@@ -1,0 +1,3 @@
+{ "name": "meridian-keeper", "private": true, "type": "module",
+  "scripts": { "dry": "node keeper.mjs --once", "start": "node keeper.mjs --live" },
+  "dependencies": { "viem": "^2.57.16" } }
