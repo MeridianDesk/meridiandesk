@@ -58,6 +58,21 @@ export const errText = (e: unknown) => {
 type WriteArgs = { address: `0x${string}`; abi: Abi | readonly unknown[]; functionName: string; args?: readonly unknown[] };
 
 /**
+ * Robinhood Chain is an Arbitrum Orbit chain: the base fee can tick up between estimate and inclusion,
+ * and wallets/RPCs sometimes return a cap barely above (or below) it → "max fee per gas less than block base fee".
+ * Orbit only ever charges the base fee and refunds the rest, so a 3× headroom costs nothing extra.
+ */
+async function fees(client: NonNullable<ReturnType<typeof usePublicClient>>) {
+  try {
+    const blk = await client.getBlock();
+    const base = blk.baseFeePerGas ?? (await client.getGasPrice());
+    return { maxFeePerGas: base * 3n, maxPriorityFeePerGas: 0n };
+  } catch {
+    return {};
+  }
+}
+
+/**
  * Send → wait for receipt → only on status "success" show the receipt popup and refresh reads.
  * Never shows success for a pending or reverted tx.
  */
@@ -75,7 +90,7 @@ export function useSendTx() {
     setError(null);
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const hash = await writeContractAsync({ ...args, chainId: ACTIVE_CHAIN_ID } as any);
+      const hash = await writeContractAsync({ ...args, chainId: ACTIVE_CHAIN_ID, ...(await fees(client)) } as any);
       const r = await client.waitForTransactionReceipt({ hash });
       if (r.status !== "success") throw new Error("Transaction reverted");
       await qc.invalidateQueries();

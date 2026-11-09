@@ -14,6 +14,9 @@ import { FaucetButton, Gate, MAX_RANGE, th, useMounted, useUsdg } from "./live";
 
 const C = ACTIVE_CHAIN_ID;
 const OPTIONS = deployed(C, "OptionsEngine");
+// OptionsEngine deployment block per chain (from contracts/broadcast) — floor for the first history scan,
+// otherwise the 45-day look-back walks hundreds of 49k-block chunks and History never finishes loading.
+const OPTIONS_START: Partial<Record<number, bigint>> = { 46630: 149_373_383n };
 const REGISTRY = deployed(C, "MarketRegistry");
 const USDG = deployed(C, "usdg");
 
@@ -244,7 +247,8 @@ function useOptionsHistory() {
         // options can be bought up to 45d before expiry; bound the scan by the earliest expiry
         const firstExp = all.reduce((m, x) => (x.o.expiry < m ? x.o.expiry : m), all[0].o.expiry);
         const est = head - BigInt(Math.ceil((Math.max(0, Number(latest.timestamp) - Number(firstExp)) + 45 * 86400) / spb));
-        from = est > 0n ? est : 0n;
+        const floor = OPTIONS_START[C] ?? 0n;
+        from = est > floor ? est : floor;
       }
       let rows = cache?.rows ?? [];
       setState({ key, rows, scanning: true });
