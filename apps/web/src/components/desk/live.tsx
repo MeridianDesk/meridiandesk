@@ -123,8 +123,8 @@ export function LivePerpsTicket({ symbol, lm }: { symbol: string; lm: ListedMark
 
   const submit = async () => {
     if (needsApprove) {
-      await tx.send("approve", { address: USDG!, abi: erc20Abi, functionName: "approve", args: [PERPS!, maxUint256] });
-      return;
+      // one-time approval, then continue straight into the open (second wallet prompt)
+      if (!(await tx.send("approve", { address: USDG!, abi: erc20Abi, functionName: "approve", args: [PERPS!, maxUint256] }))) return;
     }
     const ok = await tx.send("open", { address: PERPS!, abi: perpsAbi, functionName: "open", args: [lm.token, side === "long", c, LEV_BPS[lev], accept] }, { title: t.openedTitle, summary: `${label} · ${fmtUsd(size)} USDG notional` });
     if (ok) setV("");
@@ -430,7 +430,7 @@ export function PoolPanel() {
               type="button"
               disabled={!!tx.busy || c === 0n || balance === undefined || c > balance}
               onClick={async () => {
-                if (needsApprove) { await tx.send("approve", { address: USDG!, abi: erc20Abi, functionName: "approve", args: [POOL!, maxUint256] }); return; }
+                if (needsApprove && !(await tx.send("approve", { address: USDG!, abi: erc20Abi, functionName: "approve", args: [POOL!, maxUint256] }))) return;
                 if (await tx.send("deposit", { address: POOL!, abi: poolAbi, functionName: "deposit", args: [c, address!] }, { title: t.deposit, summary: `${fmtUsd(c)} test USDG → pool` })) setV("");
               }}
               className="h-10 rounded-[4px] bg-dawn px-4 font-inter text-[13.5px] font-medium text-void hover:bg-dawn-hi disabled:opacity-50"
