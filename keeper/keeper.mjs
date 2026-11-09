@@ -143,12 +143,12 @@ async function bracketRound(feed, expiry) {
 
 async function settle() {
   const next = Number(await pub.readContract({ address: dep.OptionsEngine, abi: optAbi, functionName: "nextOptionId" }));
-  const now = BigInt(Math.floor(Date.now() / 1000));
+  const now = (await pub.getBlock()).timestamp; // chain time, not wall clock
   let pending = 0;
   for (let id = 1; id < next; id++) {
     if (done.opt.has(id)) continue;
     const o = await pub.readContract({ address: dep.OptionsEngine, abi: optAbi, functionName: "getOption", args: [BigInt(id)] });
-    if (o.status !== 0) { done.opt.add(id); continue; } // 0 = Open
+    if (o.status !== 1) { done.opt.add(id); continue; } // enum Status { None, Open, Settled, Voided }
     if (o.expiry > now) continue;
     pending++;
     const [feed] = await pub.readContract({ address: dep.MarketRegistry, abi: regAbi, functionName: "oracleOf", args: [o.token] });

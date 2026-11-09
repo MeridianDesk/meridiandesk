@@ -11,7 +11,7 @@ import { ago, fmtPx, fmtUsd, LEV_BPS, USDG_DEC, useOraclePrice, useReady, useSen
 import { Row } from "./bits";
 
 const noop = () => () => {};
-const useMounted = () => useSyncExternalStore(noop, () => true, () => false);
+export const useMounted = () => useSyncExternalStore(noop, () => true, () => false);
 
 const C = ACTIVE_CHAIN_ID;
 const PERPS = deployed(C, "PerpsEngine");
@@ -27,7 +27,7 @@ const parse = (v: string) => {
   try { return v ? parseUnits(v as `${number}`, USDG_DEC) : 0n; } catch { return 0n; }
 };
 
-function useUsdg(spender: `0x${string}` | null) {
+export function useUsdg(spender: `0x${string}` | null) {
   const { address } = useReady();
   const q = useReadContracts({
     contracts: [
@@ -59,7 +59,7 @@ export function FaucetButton() {
   );
 }
 
-function Gate({ children }: { children: React.ReactNode }) {
+export function Gate({ children }: { children: React.ReactNode }) {
   const mounted = useMounted();
   const { connected, onChain } = useReady();
   if (!mounted || !connected) return <p className="rounded-[5px] border border-white/[0.08] px-3 py-2.5 font-inter text-[12.5px] text-haze">{t.connectToTrade}</p>;
@@ -240,7 +240,7 @@ function useWalletPositions() {
   return { all, loading: ids.isLoading || pos.isLoading };
 }
 
-const th = "px-3 py-2 text-right font-plex text-[10.5px] font-normal uppercase tracking-[0.08em] text-smoke";
+export const th = "px-3 py-2 text-right font-plex text-[10.5px] font-normal uppercase tracking-[0.08em] text-smoke";
 
 /** Open Perps positions of the connected wallet; `token` narrows to one market. */
 export function LivePositions({ token }: { token?: string | null }) {
@@ -267,7 +267,7 @@ export function LivePositions({ token }: { token?: string | null }) {
 const evOpened = parseAbiItem("event PositionOpened(uint256 indexed id, address indexed owner, address indexed token, bool isLong, uint16 leverageBps, uint256 collateral, uint256 size, uint256 price, uint256 fee)");
 const evClosed = parseAbiItem("event PositionClosed(uint256 indexed id, address indexed owner, uint256 price, int256 pnl, uint256 funding, uint256 fee, uint256 paidOut)");
 const evLiq = parseAbiItem("event PositionLiquidated(uint256 indexed id, address indexed owner, address indexed keeper, uint256 price, int256 equity, uint256 keeperFee, uint256 paidOut)");
-const MAX_RANGE = 49_000n; // public RPC caps eth_getLogs at 50k blocks
+export const MAX_RANGE = 49_000n; // public RPC caps eth_getLogs at 50k blocks
 
 type HistRow = { kind: "Open" | "Close" | "Liquidated"; id: string; block: string; tx: string; price: string; pnl?: string; fee: string; paidOut?: string; collateral?: string };
 type HistCache = { from: string; to: string; rows: HistRow[] };

@@ -57,6 +57,8 @@ const pick = (abi, names) => abi.filter((x) => (x.type === "function" && names.i
 const abis = {
   perpsAbi: pick(abiOf("PerpsEngine"), ["open", "close", "getPosition", "positionsOf", "positionHealth", "liquidationPrice", "marketConfig", "marketState", "minCollateral", "maxCollateralPerPosition", "frozen", "paused"]),
   poolAbi: pick(abiOf("LiquidityPool"), ["deposit", "redeem", "totalAssets", "freeLiquidity", "utilizationBps", "balanceOf", "maxRedeem", "maxDeposit", "convertToAssets", "decimals"]),
+  optionsAbi: pick(abiOf("OptionsEngine"), ["buy", "getOption", "optionsOf", "payoutAt", "maxPayoutOf", "nextOptionId", "maxPremiumPerOption", "minTimeToExpiry", "maxTimeToExpiry", "totalMaxPayout", "totalMaxPayoutCap", "nonceUsed", "paused", "callPayoutCapBps"]),
+  registryAbi: pick(abiOf("MarketRegistry"), ["isOptionsEnabled", "isPerpsEnabled"]),
   oracleAbi: pick(abiOf("OracleRouter"), ["price"]),
   // Test USDG (MockERC20) — public mint, testnet only.
   testUsdgAbi: pick(abiOf("Mocks", "MockERC20"), ["mint"]),

@@ -259,6 +259,16 @@ export const testnetDesk = {
   freeLiquidity: "Free liquidity",
   utilization: "Utilization",
   failed: "Transaction failed.",
+  // Options (testnet quoter)
+  optQty: "Quantity",
+  optQtyUnit: "units",
+  optQuoteNote: "Testnet pricing: Black-Scholes, flat 60% IV. Quote valid 60 s.",
+  optNotEnabled: "Options are not enabled for this market on testnet yet.",
+  optQuoting: "Fetching quote…",
+  optBoughtTitle: "Option bought",
+  noOptions: "No open Options positions.",
+  noOptHistory: "No Options trades yet.",
+  awaitingSettle: "Awaiting settlement",
 } as const;
 
 /** Draft copy — tx success popup. */

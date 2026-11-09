@@ -5,11 +5,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { appUi, testnetDesk } from "@/content/copy";
 import { ACTIVE_CHAIN_ID, addressUrl } from "@/content/chain";
-import { listed, type ListedMarket } from "@/content/deployments";
+import { deployed, listed, type ListedMarket } from "@/content/deployments";
 import { bySymbol, CHAIN_EXPLORER, registry, type Market } from "@/content/registry";
 import { Glyph, Row, short, StatusBadge } from "./bits";
 import { Catalog, type Desk } from "./catalog";
 import { OptionsTicket, PerpsTicket, TicketHeader } from "./tickets";
+import { LiveOptionsHistory, LiveOptionsPositions, LiveOptionsTicket } from "./live-options";
 import { LiveHistory, LiveMark, LivePerpsTicket, LivePositions, useMarketStats } from "./live";
 import { ago, fmtPx, fmtUsd, useOraclePrice } from "@/lib/onchain";
 import { change24h, usePriceHistory } from "@/lib/price-history";
@@ -143,7 +144,7 @@ function Positions({ desk, live, token, symbol }: { desk: Desk; live: boolean; t
           </div>
         ) : null}
       </div>
-      {!live ? <p className="px-5 py-6 font-inter text-[13px] text-haze">{appUi.portfolioEmpty}</p> : tab === "positions" ? <LivePositions token={filter} /> : <LiveHistory token={filter} />}
+      {!live ? <p className="px-5 py-6 font-inter text-[13px] text-haze">{appUi.portfolioEmpty}</p> : desk === "options" ? (tab === "positions" ? <LiveOptionsPositions token={filter} /> : <LiveOptionsHistory token={filter} />) : tab === "positions" ? <LivePositions token={filter} /> : <LiveHistory token={filter} />}
     </section>
   );
 }
@@ -151,10 +152,11 @@ function Positions({ desk, live, token, symbol }: { desk: Desk; live: boolean; t
 export function DeskView({ desk, symbol }: { desk: Desk; symbol?: string }) {
   const router = useRouter();
   const firstLive = registry.find((x) => x.perps === "live")?.symbol;
-  const fallback = desk === "perps" ? (firstLive ?? "NVDA") : "AAPL";
+  const fallback = firstLive ?? "NVDA";
   const m = (symbol ? bySymbol(symbol) : undefined) ?? bySymbol(fallback) ?? registry[0];
-  const lm = desk === "perps" ? listed(ACTIVE_CHAIN_ID, m.symbol) : null;
-  const live = !!lm?.perps;
+  const lm = listed(ACTIVE_CHAIN_ID, m.symbol);
+  // Options go live wherever the market has an on-chain feed; the ticket itself checks registry.isOptionsEnabled.
+  const live = desk === "perps" ? !!lm?.perps : !!lm?.feed && !!deployed(ACTIVE_CHAIN_ID, "OptionsEngine");
   const select = (x: Market) => router.push(`/app/${desk}/${x.symbol}`, { scroll: false });
 
   return (
@@ -169,7 +171,7 @@ export function DeskView({ desk, symbol }: { desk: Desk; symbol?: string }) {
       <aside aria-label="Order ticket" className="order-2 min-h-0 overflow-y-auto border-white/[0.07] lg:order-3 lg:border-l max-lg:border-t">
         <TicketHeader desk={desk} />
         <div className="p-4">
-          {desk === "perps" ? (live && lm ? <LivePerpsTicket key={m.symbol} symbol={m.symbol} lm={lm} /> : <PerpsTicket key={m.symbol} m={m} />) : <OptionsTicket key={m.symbol} m={m} />}
+          {desk === "perps" ? (live && lm ? <LivePerpsTicket key={m.symbol} symbol={m.symbol} lm={lm} /> : <PerpsTicket key={m.symbol} m={m} />) : live && lm ? <LiveOptionsTicket key={m.symbol} symbol={m.symbol} lm={lm} /> : <OptionsTicket key={m.symbol} m={m} />}
         </div>
         <p className="px-4 pb-4 font-plex text-[10.5px] uppercase tracking-[0.1em] text-smoke">{live ? testnetDesk.illustrative : "Illustrative · values unavailable until oracle connects"}</p>
       </aside>
