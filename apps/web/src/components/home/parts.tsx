@@ -4,13 +4,14 @@ import type { FeaturedToken } from "@/content/featured";
 
 export const APP = "/app";
 
-/** Meridian mark: two meridian arcs crossed by the vertical noon line. */
+/** Meridian mark (PM logo, meridian-logo.png traced to vector): ivory M-monogram with a dawn noon block. */
 export function VMark({ size = 22 }: { size?: number; light?: boolean }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M2.5 19 A 9.5 9.5 0 0 1 21.5 19" fill="none" stroke="#f0c48e" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M7 19 A 5 5 0 0 1 17 19" fill="none" stroke="#ffe7c4" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M12 3 V21" stroke="#f4f1ea" strokeWidth="2.2" strokeLinecap="round" />
+    <svg width={size} height={size} viewBox="80 84 240 240" aria-hidden="true">
+      <path d="M143 102H315V141H157L123 175V269H180V306H85V160Z" fill="#f4f1ea" />
+      <path d="M277 141H315V249L258 306H220V269H242L277 234Z" fill="#f4f1ea" />
+      <rect x="181" y="141" width="38" height="108" fill="#f4f1ea" />
+      <rect x="181" y="249" width="38" height="20" fill="#f0c48e" />
     </svg>
   );
 }

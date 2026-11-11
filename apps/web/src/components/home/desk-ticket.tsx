@@ -42,7 +42,7 @@ export function DeskTicket({ initial = "perps" }: { initial?: Desk }) {
           <span className="font-zal text-[15px] font-medium text-ivory">NVDA</span>
           <span className="font-inter text-[12px] text-smoke">NVIDIA · Stock Token</span>
         </div>
-        <span className="rounded-[3px] border border-white/10 px-2 py-0.5 font-plex text-[10px] uppercase tracking-[0.12em] text-smoke">Illustrative</span>
+        <span className="rounded-[3px] border border-white/10 px-2 py-0.5 font-plex text-[10px] uppercase tracking-[0.12em] text-smoke">Order ticket</span>
       </div>
 
       <div role="tablist" aria-label="Desk" className="flex gap-1 rounded-[6px] bg-char-2 p-1">

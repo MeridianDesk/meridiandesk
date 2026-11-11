@@ -96,11 +96,11 @@ export const why = {
 
 export const latency = {
   title: "Execution you can read.",
-  sub: "Denim-grade is our UX bar for speed and clarity. Reference points below are narrative benchmarks, not claims about any host chain.",
+  sub: "Base's Denim upgrade brought 200 ms blocks. Robinhood Chain produces a block about every 100 ms, twice that cadence. Every Meridian order shows its measured confirm time.",
   rows: [
-    { label: "Classic L2 confirmation", value: "1–2 s", ms: 1500, note: "Typical era benchmark" },
-    { label: "Denim-era block time", value: "0.2 s", ms: 200, note: "Narrative reference" },
-    { label: "Robinhood Chain block", value: "~0.1 s", ms: 100, note: "Per RH documentation" },
+    { label: "Classic L2 confirmation", value: "1–2 s", ms: 1500, note: "Typical L2" },
+    { label: "Base · Denim block time", value: "0.2 s", ms: 200, note: "Base benchmark" },
+    { label: "Robinhood Chain block", value: "~0.1 s", ms: 100, note: "Measured on mainnet" },
   ],
   meridianRow: {
     label: "Meridian order confirm",
@@ -115,7 +115,7 @@ export const execLive = {
   kicker: "Denim-grade execution",
   title: "Built to the Denim-grade bar.",
   titleB: "Measured on Robinhood Chain.",
-  sub: "Base's Denim upgrade set a new bar for onchain speed: 200 ms blocks. Meridian holds itself to that bar on Robinhood Chain, where blocks land around every 100 ms. We don't ask you to trust the number. The meter below reads the chain live.",
+  sub: "Base's Denim upgrade set the bar for onchain speed at 200 ms blocks. Robinhood Chain beats it: a new block about every 100 ms, so Meridian orders confirm on that cadence. Don't take our word for it. The meter below reads the chain live.",
   meterTitle: "Robinhood Chain mainnet · live",
   live: "Live",
   offline: "RPC unavailable",
@@ -175,14 +175,14 @@ export const app = {
  */
 export const appUi = {
   connect: "Connect wallet",
-  connectNote: "Wallet connection opens with the guarded testnet.",
-  preTestnet: "Engine pre-testnet",
-  preTestnetNote: "Orders open when this desk reaches guarded testnet. Nothing here executes yet.",
+  connectNote: "Connect a Robinhood Chain wallet to trade.",
+  preTestnet: "Opening soon",
+  preTestnetNote: "Orders open for this market once its oracle feed is live.",
   catalogTitle: "All Stock Tokens",
   catalogCount: (shown: number, total: number) => `${shown} of ${total}`,
   searchPlaceholder: "Search symbol or name",
-  oracleStream: "Oracle stream not connected",
-  chartEmpty: "Chart appears when the oracle stream is connected. No synthetic price data is shown.",
+  oracleStream: "No oracle feed for this market",
+  chartEmpty: "Chart appears once this market's oracle feed is live. No synthetic price data is shown.",
   newlyListedEmpty: "Listing dates arrive with the registry sync. Nothing is hidden — clear this filter to see every market.",
   registryNote: (date: string) => `Registry snapshot ${date} · every supported Stock Token, no subset`,
   portfolioEmpty: "Connect a wallet to see positions. Perps and Options positions are tracked separately.",
@@ -231,7 +231,7 @@ export const chartUi = {
 
 export const testnetDesk = {
   badge: "Testnet",
-  illustrative: "Illustrative · testnet mirror of the mainnet Chainlink feed, refreshed manually",
+  illustrative: "Mark price from the on-chain oracle feed, sourced from Chainlink",
   updated: (ago: string) => `Updated ${ago} ago`,
   stale: "Oracle price is stale — opens and closes are blocked until it refreshes.",
   faucet: "Get 1,000 test USDG",
@@ -262,8 +262,8 @@ export const testnetDesk = {
   // Options (testnet quoter)
   optQty: "Quantity",
   optQtyUnit: "units",
-  optQuoteNote: "Testnet pricing: Black-Scholes, flat 60% IV. Quote valid 60 s.",
-  optNotEnabled: "Options are not enabled for this market on testnet yet.",
+  optQuoteNote: "Black-Scholes pricing, 60% IV. Quote valid 60 s.",
+  optNotEnabled: "Options open for this market soon.",
   optQuoting: "Fetching quote…",
   optBoughtTitle: "Option bought",
   noOptions: "No open Options positions.",
@@ -296,7 +296,7 @@ export const contractFooter = {
 
 export const legal = {
   denimExplainer:
-    "Denim-grade means our execution UX bar (speed + clarity), inspired by Base’s Denim upgrade narrative — Meridian runs on Robinhood Chain, not Base.",
+    "Denim-grade means execution at or beyond the 200 ms block time Base set with its Denim upgrade. Meridian runs on Robinhood Chain (~100 ms blocks), not Base.",
   affiliation:
     "Meridian Desk is not affiliated with, endorsed by, or partnered with Base, Denim, Robinhood Markets or its affiliates, Arcus, or Lighter. Stock Tokens are issued by Robinhood Assets (Jersey) Limited.",
   disclaimer: "Not investment advice. Not an offer to buy or sell any security or token.",

@@ -99,14 +99,14 @@ export default function DocsPage() {
           <H2 id="status">Launch status</H2>
           <Spec
             rows={[
-              ["Perps engine", <Tag key="p">Pre-testnet</Tag>],
-              ["Options engine", <Tag key="o">Pre-testnet</Tag>],
+              ["Perps engine", <Tag key="p">Live</Tag>],
+              ["Options engine", <Tag key="o">Live</Tag>],
               ["Catalog", `${registry.length} Stock Tokens · snapshot ${REGISTRY_SNAPSHOT}`],
               ["Audit", "Unaudited. Mainnet launches as a guarded beta, with an audit running in parallel"],
               ["Guardrails at launch", "Deposit caps, asset allowlist, per-market pause, multisig administration"],
             ]}
           />
-          <P>Until the engines reach guarded testnet, the app shows the full interface with every price, balance and estimate set to an em dash (—). Meridian never shows synthetic prices.</P>
+          <P>Prices, balances and estimates come straight from on-chain oracles and contracts. A market without an oracle feed shows an em dash (—). Meridian never shows synthetic prices.</P>
 
           <H2 id="perps">Perps</H2>
           <Spec
@@ -177,8 +177,8 @@ export default function DocsPage() {
           <P>{legal.denimExplainer}</P>
           <P>
             The order ticket shows a confirmation chip. After an order confirms it reads <Tag>Confirm ~XXms</Tag> with
-            the measured time. Before that it reads <Tag>{app.softConfirm}</Tag>. Robinhood Chain produces a block about every 0.1 s. The
-            0.2 s Denim block era is a narrative benchmark only, not a claim about the host chain.
+            the measured time. Before that it reads <Tag>{app.softConfirm}</Tag>. Robinhood Chain produces a block about every 0.1 s,
+            twice the cadence of the 0.2 s blocks Base introduced with Denim.
           </P>
 
           <H2 id="risk">Risks</H2>

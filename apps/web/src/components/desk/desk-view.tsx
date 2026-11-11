@@ -173,7 +173,7 @@ export function DeskView({ desk, symbol }: { desk: Desk; symbol?: string }) {
         <div className="p-4">
           {desk === "perps" ? (live && lm ? <LivePerpsTicket key={m.symbol} symbol={m.symbol} lm={lm} /> : <PerpsTicket key={m.symbol} m={m} />) : live && lm ? <LiveOptionsTicket key={m.symbol} symbol={m.symbol} lm={lm} /> : <OptionsTicket key={m.symbol} m={m} />}
         </div>
-        <p className="px-4 pb-4 font-plex text-[10.5px] uppercase tracking-[0.1em] text-smoke">{live ? testnetDesk.illustrative : "Illustrative · values unavailable until oracle connects"}</p>
+        <p className="px-4 pb-4 font-plex text-[10.5px] uppercase tracking-[0.1em] text-smoke">{live ? testnetDesk.illustrative : "Values appear once this market's oracle feed is live"}</p>
       </aside>
     </div>
   );

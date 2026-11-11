@@ -163,7 +163,7 @@ export default function Home() {
             })}
           </div>
           <p className={`${wrap} mt-6 font-plex text-[11px] text-smoke`}>
-            Featured list is illustrative and landing-only. Live marks come from official oracle feeds in the app; tokens without a feed show “Oracle unavailable”.
+            Featured list is a selection. Live marks come from official oracle feeds in the app; tokens without a feed show “Oracle unavailable”.
           </p>
         </section>
 
