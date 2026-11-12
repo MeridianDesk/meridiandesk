@@ -1,0 +1,9 @@
+{
+  "chainId": 4663,
+  "TSLA": {
+    "token": "0x322f0929c4625ed5bad873c95208d54e1c003b2d",
+    "feed": "0x4A1166a659A55625345e9515b32adECea5547C38",
+    "sourceFeed": null,
+    "perps": true
+  }
+}

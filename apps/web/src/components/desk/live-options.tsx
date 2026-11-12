@@ -16,7 +16,7 @@ const C = ACTIVE_CHAIN_ID;
 const OPTIONS = deployed(C, "OptionsEngine");
 // OptionsEngine deployment block per chain (from contracts/broadcast) — floor for the first history scan,
 // otherwise the 45-day look-back walks hundreds of 49k-block chunks and History never finishes loading.
-const OPTIONS_START: Partial<Record<number, bigint>> = { 46630: 149_373_383n };
+const OPTIONS_START: Partial<Record<number, bigint>> = { 46630: 149_373_383n, 4663: 112_561_077n };
 const REGISTRY = deployed(C, "MarketRegistry");
 const USDG = deployed(C, "usdg");
 

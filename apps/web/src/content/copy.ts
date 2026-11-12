@@ -5,6 +5,8 @@
  * "Meridian is Denim on Robinhood", "Official Base Denim partner", "Denim connected".
  */
 
+import { ACTIVE_CHAIN_ID } from "./chain";
+
 export const brand = {
   name: "Meridian Desk",
   short: "Meridian",
@@ -233,16 +235,20 @@ export const chartUi = {
   aria: (s: string, n: number) => `${s} oracle price, ${n} Chainlink rounds`,
 } as const;
 
+// Desk strings adapt to NEXT_PUBLIC_CHAIN_ID: testnet wording never ships on the mainnet build.
+const MAINNET = ACTIVE_CHAIN_ID === 4663;
+
 export const testnetDesk = {
-  badge: "Testnet",
+  badge: MAINNET ? "Oracle" : "Testnet",
+  mainnet: MAINNET,
   illustrative: "Mark price from the on-chain oracle feed, sourced from Chainlink",
   updated: (ago: string) => `Updated ${ago} ago`,
   stale: "Oracle price is stale — opens and closes are blocked until it refreshes.",
   faucet: "Get 1,000 test USDG",
   faucetNote: "Test token — no value",
-  connectToTrade: "Connect a wallet to trade on testnet.",
-  wrongChain: "Switch your wallet to Robinhood Chain Testnet to trade.",
-  approve: "Approve test USDG",
+  connectToTrade: MAINNET ? "Connect a wallet to trade." : "Connect a wallet to trade on testnet.",
+  wrongChain: MAINNET ? "Switch your wallet to Robinhood Chain to trade." : "Switch your wallet to Robinhood Chain Testnet to trade.",
+  approve: MAINNET ? "Approve USDG" : "Approve test USDG",
   approving: "Approving…",
   sending: "Confirm in wallet…",
   range: (min: string, max: string) => `Collateral ${min}–${max} USDG per position`,
@@ -255,7 +261,7 @@ export const testnetDesk = {
   openedTitle: "Position opened",
   closedTitle: "Position closed",
   poolTitle: "Liquidity pool",
-  poolNote: "Shared test-USDG pool. It is the counterparty to every Perps and Options trade, so LPs can lose money when traders win.",
+  poolNote: MAINNET ? "Shared USDG pool. It is the counterparty to every Perps and Options trade, so LPs can lose money when traders win." : "Shared test-USDG pool. It is the counterparty to every Perps and Options trade, so LPs can lose money when traders win.",
   deposit: "Deposit",
   withdrawAll: "Withdraw all",
   yourShare: "Your deposit",

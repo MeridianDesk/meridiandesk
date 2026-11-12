@@ -1,5 +1,20 @@
 {
-  "4663": {},
+  "4663": {
+    "MarketRegistry": "0x98d814FF6f36E961CBF1b40af1bec146164AE347",
+    "OracleRouter": "0xB739878Be957dEeaeB836D4A05A63b22A08D98Be",
+    "LiquidityPool": "0xa7BC06622a45612d41066039d050618A2b4D8E9f",
+    "PerpsEngine": "0xf6b07174CD2244D928e9e012D4703B3984712B6A",
+    "OptionsEngine": "0xDC44F3e91B782584eEd60D1e3E57F3638217aA21",
+    "usdg": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+    "markets": {
+      "TSLA": {
+        "token": "0x322f0929c4625ed5bad873c95208d54e1c003b2d",
+        "feed": "0x4A1166a659A55625345e9515b32adECea5547C38",
+        "sourceFeed": null,
+        "perps": true
+      }
+    }
+  },
   "46630": {
     "MarketRegistry": "0x3b85D522379906b44262d983f336494F57458141",
     "OracleRouter": "0x7126175A7ed67fF14049479C29Db925122fAc27D",

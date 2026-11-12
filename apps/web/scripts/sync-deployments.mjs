@@ -16,6 +16,21 @@ const addr = /^0x[0-9a-fA-F]{40}$/;
 const ZERO = "0x0000000000000000000000000000000000000000";
 const real = (a) => (addr.test(a ?? "") && a !== ZERO ? a : null);
 
+// eth_call MarketRegistry.isPerpsEnabled(token) on mainnet (public RPC, read-only).
+const MAINNET_RPC = process.env.SYNC_RPC_MAINNET || "https://robinhood-rpc.publicnode.com";
+async function perpsEnabledOnChain(registry, token) {
+  if (!registry) return false;
+  const data = "0x" + "b84f545a" + token.slice(2).toLowerCase().padStart(64, "0");
+  const res = await fetch(MAINNET_RPC, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: registry, data }, "latest"] }),
+  });
+  const j = await res.json();
+  if (j.error) throw new Error(`isPerpsEnabled: ${j.error.message}`);
+  return BigInt(j.result ?? "0x0") === 1n;
+}
+
 const result = {};
 for (const id of ["4663", "46630"]) {
   const f = resolve(src, `${id}.json`);
@@ -30,15 +45,23 @@ for (const id of ["4663", "46630"]) {
   if (!existsSync(lf)) continue;
   // forge writes listed.*.json during SIMULATION too. Only trust it once every tx of the
   // SetupTestnet broadcast has a successful receipt.
-  const run = resolve(root, `broadcast/SetupTestnet.s.sol/${id}/run-latest.json`);
-  const r = existsSync(run) ? JSON.parse(readFileSync(run, "utf8")) : null;
-  const landed = r && r.transactions?.length > 0 && r.receipts?.length === r.transactions.length && r.receipts.every((x) => x.status === "0x1");
-  if (!landed) { console.log(`${id}: listed markets NOT synced — SetupTestnet broadcast has no successful receipts yet`); continue; }
+  // Mainnet markets are listed by the Safe (script/mainnet/batches), so there is no forge
+  // broadcast to check: each market is verified on-chain via MarketRegistry instead.
+  if (id !== "4663") {
+    const run = resolve(root, `broadcast/SetupTestnet.s.sol/${id}/run-latest.json`);
+    const r = existsSync(run) ? JSON.parse(readFileSync(run, "utf8")) : null;
+    const landed = r && r.transactions?.length > 0 && r.receipts?.length === r.transactions.length && r.receipts.every((x) => x.status === "0x1");
+    if (!landed) { console.log(`${id}: listed markets NOT synced — SetupTestnet broadcast has no successful receipts yet`); continue; }
+  }
   const l = JSON.parse(readFileSync(lf, "utf8"));
   if (String(l.chainId) !== id) throw new Error(`${lf}: chainId ${l.chainId} != ${id}`);
   const markets = {};
   for (const [sym, m] of Object.entries(l)) {
     if (sym === "chainId" || !real(m.token)) continue;
+    if (id === "4663" && !(await perpsEnabledOnChain(result[id].MarketRegistry, m.token))) {
+      console.log(`4663: ${sym} NOT synced — perps not enabled on-chain yet`);
+      continue;
+    }
     markets[sym] = { token: m.token, feed: real(m.feed), sourceFeed: real(m.sourceFeed), perps: m.perps === true };
   }
   result[id].markets = markets;

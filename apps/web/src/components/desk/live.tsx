@@ -146,7 +146,7 @@ export function LivePerpsTicket({ symbol, lm }: { symbol: string; lm: ListedMark
         </label>
         <div className="flex h-10 items-center rounded-[4px] border border-white/10 bg-void px-3 focus-within:border-dawn/60">
           <input id="perps-size" inputMode="decimal" value={v} onChange={(e) => setV(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="0.00" className="h-full w-full bg-transparent font-plex text-[14px] text-ivory placeholder:text-smoke focus:outline-none" />
-          <span className="font-plex text-[12px] text-haze">tUSDG</span>
+          <span className="font-plex text-[12px] text-haze">{C === 46630 ? "tUSDG" : "USDG"}</span>
         </div>
         <div className="mt-1 flex justify-between gap-2">
           <span className="font-plex text-[11px] text-smoke">{minC !== undefined && maxC !== undefined ? t.range(fmtUsd(minC, USDG_DEC, 0), fmtUsd(maxC, USDG_DEC, 0)) : "—"}</span>
@@ -424,7 +424,7 @@ export function PoolPanel() {
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex h-10 min-w-[200px] flex-1 items-center rounded-[4px] border border-white/10 bg-void px-3 focus-within:border-dawn/60">
               <input aria-label="Deposit amount" inputMode="decimal" value={v} onChange={(e) => setV(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="0.00" className="h-full w-full bg-transparent font-plex text-[14px] text-ivory placeholder:text-smoke focus:outline-none" />
-              <span className="font-plex text-[12px] text-haze">tUSDG</span>
+              <span className="font-plex text-[12px] text-haze">{C === 46630 ? "tUSDG" : "USDG"}</span>
             </div>
             <button
               type="button"

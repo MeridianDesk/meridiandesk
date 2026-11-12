@@ -127,14 +127,14 @@ function MarketPanel({ m, desk, lm }: { m: Market; desk: Desk; lm: ListedMarket 
       <div className="grid gap-x-8 px-5 py-3 md:grid-cols-2">
         <div>
           {lm ? (
-            <Row k={`${testnetDesk.badge} token`} v={<a className="hover:text-dawn" href={addressUrl(lm.token)} target="_blank" rel="noreferrer">{short(lm.token)}</a>} />
+            <Row k={testnetDesk.mainnet ? "Token contract" : `${testnetDesk.badge} token`} v={<a className="hover:text-dawn" href={addressUrl(lm.token)} target="_blank" rel="noreferrer">{short(lm.token)}</a>} />
           ) : (
             <Row k="Token contract" v={<a className="hover:text-dawn" href={`${CHAIN_EXPLORER}/address/${m.address}`} target="_blank" rel="noreferrer">{short(m.address)}</a>} />
           )}
           <Row k="Sector" v={m.sector} />
         </div>
         <div>
-          {lm?.feed ? (
+          {lm?.feed && !testnetDesk.mainnet ? (
             <Row k={`${testnetDesk.badge} mirror feed`} v={<a className="hover:text-dawn" href={addressUrl(lm.feed)} target="_blank" rel="noreferrer">{short(lm.feed)}</a>} />
           ) : null}
           <Row
