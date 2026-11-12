@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { hero } from "@/content/copy";
-import { APP, Arrow, Wordmark } from "./parts";
+import { APP, Arrow, Wordmark, XLink } from "./parts";
 
 /** Full header inside the hero frame; a compact floating pill once you scroll. */
 export function VNav() {
@@ -32,6 +32,7 @@ export function VNav() {
           <Wordmark />
           <nav aria-label="Primary" className="flex items-center gap-2">
             {links()}
+            <XLink className="ml-1 hidden h-[42px] w-[42px] items-center justify-center rounded-[4px] border border-white/10 text-haze hover:border-white/40 hover:text-ivory sm:inline-flex" />
             <Link
               href="/docs"
               className="ml-2 hidden h-[42px] items-center gap-2 rounded-[4px] border border-white/10 bg-char/[0.03] px-6 font-inter text-[14px] text-ivory hover:border-white/40 sm:inline-flex"

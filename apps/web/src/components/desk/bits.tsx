@@ -5,17 +5,8 @@ import type { DeskStatus, Market, Sector } from "@/content/registry";
 export function StatusBadge({ status }: { status: DeskStatus }) {
   if (status === "live")
     return <span className="rounded-[3px] border border-dawn/40 bg-dawn/10 whitespace-nowrap px-1.5 py-0.5 font-plex text-[10.5px] uppercase tracking-[0.06em] text-dawn">Live</span>;
-  if (status === "coming-soon")
-    return (
-      <span className="rounded-[3px] border border-white/15 whitespace-nowrap px-1.5 py-0.5 font-plex text-[10.5px] uppercase tracking-[0.06em] text-ivory/80">
-        {app.badgeComingSoon}
-      </span>
-    );
-  return (
-    <span className="rounded-[3px] border border-white/[0.08] whitespace-nowrap px-1.5 py-0.5 font-plex text-[10.5px] uppercase tracking-[0.06em] text-smoke">
-      {app.badgeOracle}
-    </span>
-  );
+  // Non-tradable markets carry no badge (PM 2026-11-12): the price column keeps every row populated.
+  return null;
 }
 
 const tint: Record<Sector, string> = {

@@ -17,6 +17,7 @@ import { change24h, usePriceHistory } from "@/lib/price-history";
 import { PriceChart } from "./price-chart";
 import { TvChart } from "./tv-chart";
 import { TV_SYMBOLS } from "@/content/tv-symbols";
+import { fmtRef, fmtVol, useRefPrices } from "@/lib/ref-prices";
 
 /** Market header + chart placeholder. Every oracle-derived value is an em dash until feeds connect. */
 function MarkStat({ lm }: { lm: ListedMarket }) {
@@ -45,7 +46,32 @@ function OiStat({ lm }: { lm: ListedMarket }) {
   return <>{s ? fmtUsd(s.oi) : "—"}</>;
 }
 
+/** Header stats for markets not listed on the active chain: Robinhood Stock Token API (reference, not a trade mark). */
+function useRefStats(m: Market) {
+  const r = useRefPrices().data?.q[m.symbol];
+  const dash = "—";
+  return {
+    mark: r ? `$${fmtRef(r.p)}` : dash,
+    range: r?.lo && r?.hi ? `${fmtRef(r.lo)} – ${fmtRef(r.hi)}` : dash,
+    vol: r?.vol ? fmtVol(r.vol) : dash,
+  };
+}
+
 function MarketPanel({ m, desk, lm }: { m: Market; desk: Desk; lm: ListedMarket | null }) {
+  const ref = useRefStats(m);
+  const stats: readonly (readonly [string, React.ReactNode])[] = lm
+    ? [
+        ["Oracle mark", <MarkStat key="mk" lm={lm} />],
+        ["24h", m.oracle ? <ChangeStat key="ch" feed={m.oracle} /> : "—"],
+        [desk === "perps" ? "Funding" : "IV", "—"],
+        ["Open interest", <OiStat key="oi" lm={lm} />],
+      ]
+    : [
+        ["Price", ref.mark],
+        ["Day range", ref.range],
+        ["Volume", ref.vol],
+        ["Open interest", "$0.00"],
+      ];
   return (
     <section aria-label={`${m.symbol} market`} className="flex shrink-0 flex-col">
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-white/[0.07] px-5 py-4">
@@ -60,8 +86,8 @@ function MarketPanel({ m, desk, lm }: { m: Market; desk: Desk; lm: ListedMarket 
           </div>
         </div>
         <dl className="flex flex-wrap gap-x-6 gap-y-1 font-plex text-[12px]">
-          {([["Oracle mark", lm ? <MarkStat key="mk" lm={lm} /> : "—"], ["24h", m.oracle ? <ChangeStat key="ch" feed={m.oracle} /> : "—"], [desk === "perps" ? "Funding" : "IV", "—"], ["Open interest", lm ? <OiStat key="oi" lm={lm} /> : "—"]] as const).map(([k, v]) => (
-            <div key={k}>
+          {stats.map(([k, v]) => (
+            <div key={k} title={lm ? undefined : appUi.refPriceTitle}>
               <dt className="text-[10.5px] uppercase tracking-[0.08em] text-smoke">{k}</dt>
               <dd className="text-ivory/70">{v}</dd>
             </div>

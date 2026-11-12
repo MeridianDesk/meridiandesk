@@ -147,8 +147,8 @@ export default function DocsPage() {
 
           <H2 id="catalog">Market catalog</H2>
           <P>
-            The app lists every supported Stock Token with no hidden subset. A token that lacks an oracle, or is not yet
-            tradable on one desk, stays in the list with a <Tag>{app.badgeComingSoon}</Tag> or <Tag>{app.badgeOracle}</Tag> badge. Filters only
+            The app lists every supported Stock Token with no hidden subset. Every row shows the live Stock Token price
+            from the Robinhood Stock Token API. Markets open for trading on a desk carry a <Tag>Live</Tag> badge. Filters only
             narrow the view you asked for. Resetting them always brings back 100% of the catalog.
           </P>
           <Spec
@@ -171,7 +171,7 @@ export default function DocsPage() {
             market hours (24/5). Stock Tokens can move on chain while the underlying market is closed, so prices can gap
             across weekends, holidays and session changes.
           </P>
-          <P>When a feed is stale or missing, that market shows <Tag>{app.badgeOracle}</Tag> and new orders on it are blocked.</P>
+          <P>When a feed is stale or missing, new orders on that market are blocked.</P>
 
           <H2 id="execution">Execution & latency</H2>
           <P>{legal.denimExplainer}</P>

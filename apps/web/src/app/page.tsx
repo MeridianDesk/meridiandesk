@@ -29,8 +29,7 @@ export default function Home() {
 
             <div className={`${wrap} grid flex-1 items-center gap-10 pt-32 md:pt-36 ${short}:pt-24 xl:grid-cols-[1fr_400px]`}>
               <div className="self-start">
-                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-char/[0.04] py-1 pl-1 pr-3 font-inter text-[12.5px] text-haze backdrop-blur-sm">
-                  <span className="rounded-full bg-dawn px-2 py-0.5 font-plex text-[10.5px] uppercase tracking-[0.1em] text-void">Max 2×</span>
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-char/[0.04] py-1.5 px-3 font-inter text-[12.5px] text-haze backdrop-blur-sm">
                   {brand.chainLine} · chain {brand.chainId}
                 </div>
                 <h1
@@ -163,7 +162,7 @@ export default function Home() {
             })}
           </div>
           <p className={`${wrap} mt-6 font-plex text-[11px] text-smoke`}>
-            Featured list is a selection. Live marks come from official oracle feeds in the app; tokens without a feed show “Oracle unavailable”.
+            Featured list is a selection. Every token in the app shows its live Stock Token price.
           </p>
         </section>
 
@@ -315,7 +314,7 @@ export default function Home() {
             {(
               [
                 ["Product", [["Perps", "#desks"], ["Options", "#desks"], ["Markets", "#markets"], ["Launch App", APP]]],
-                ["Resources", [["Docs", "/docs"], ["Risk", "#risk"]]],
+                ["Resources", [["Docs", "/docs"], ["Risk", "#risk"], ["X (Twitter)", brand.x]]],
               ] as const
             ).map(([h, ls]) => (
               <nav key={h} aria-label={h} className="md:col-span-2">
@@ -323,7 +322,11 @@ export default function Home() {
                 <ul className="mt-5 space-y-3.5">
                   {ls.map(([l, href]) => (
                     <li key={l}>
-                      <Link href={href} className="text-[13.5px] text-dawn-hi hover:text-ivory">
+                      <Link
+                        href={href}
+                        {...(href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}
+                        className="text-[13.5px] text-dawn-hi hover:text-ivory"
+                      >
                         {l}
                       </Link>
                     </li>

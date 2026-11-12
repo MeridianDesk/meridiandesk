@@ -10,6 +10,8 @@ export const brand = {
   short: "Meridian",
   chainLine: "On Robinhood Chain",
   chainId: 4663,
+  x: "https://x.com/MeridianDesk33",
+  xHandle: "@MeridianDesk33",
 } as const;
 
 export const nav = {
@@ -182,6 +184,8 @@ export const appUi = {
   catalogCount: (shown: number, total: number) => `${shown} of ${total}`,
   searchPlaceholder: "Search symbol or name",
   oracleStream: "No oracle feed for this market",
+  // Draft copy
+  refPriceTitle: "Stock Token price · Robinhood Stock Token API, refreshed every 15 s. Trades settle on the on-chain oracle mark.",
   chartEmpty: "Chart appears once this market's oracle feed is live. No synthetic price data is shown.",
   newlyListedEmpty: "Listing dates arrive with the registry sync. Nothing is hidden — clear this filter to see every market.",
   registryNote: (date: string) => `Registry snapshot ${date} · every supported Stock Token, no subset`,

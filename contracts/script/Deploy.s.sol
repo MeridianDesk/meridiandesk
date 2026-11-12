@@ -29,6 +29,7 @@ contract Deploy is Script {
 
         vm.startBroadcast();
         address deployer = msg.sender;
+        if (block.chainid == 4663) _mainnetGuard(usdg, admin, guardian, quoter, deployer, depositCap);
 
         MarketRegistry registry = new MarketRegistry(deployer);
         OracleRouter router = new OracleRouter(registry);
@@ -68,6 +69,33 @@ contract Deploy is Script {
         vm.serializeAddress(k, "PerpsEngine", address(perps));
         string memory json = vm.serializeAddress(k, "OptionsEngine", address(options));
         vm.writeJson(json, string.concat("deployments/", vm.toString(block.chainid), ".json"));
+    }
+
+    /// @dev Robinhood Chain mainnet: refuse anything but a guarded, Safe-administered launch.
+    function _mainnetGuard(
+        address usdg,
+        address admin,
+        address guardian,
+        address quoter,
+        address deployer,
+        uint256 depositCap
+    ) internal view {
+        require(
+            keccak256(bytes(vm.envOr("MAINNET_ACK", string("")))) == keccak256("I_UNDERSTAND_UNAUDITED_MAINNET"),
+            "mainnet: set MAINNET_ACK"
+        );
+        require(usdg == 0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168, "mainnet: USDG must be Global Dollar");
+        require(admin.code.length > 0, "mainnet: ADMIN must be a Safe (contract)");
+        require(admin != deployer, "mainnet: deployer cannot be admin");
+        // Testnet deployer key was exposed; it must never touch mainnet.
+        // Owner accepted this risk explicitly; the deployer renounces every role in this same broadcast.
+        require(
+            deployer != 0x84811fa225461c24285E16F331Ec942ac9a1C199 || vm.envOr("ALLOW_EXPOSED_DEPLOYER", false),
+            "mainnet: exposed testnet key"
+        );
+        require(quoter != address(0) && quoter != admin && quoter != deployer, "mainnet: QUOTER must be its own key");
+        require(guardian != deployer, "mainnet: guardian must not be deployer");
+        require(depositCap <= 50_000e6, "mainnet: deposit cap too high for guarded beta");
     }
 
     /// @dev Grant admin (+ extra role) to the multisig, the guardian role to a hot pause key, renounce deployer.

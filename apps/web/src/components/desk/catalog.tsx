@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { app, appUi } from "@/content/copy";
 import { registry, REGISTRY_SNAPSHOT, sectors, type Market, type Sector } from "@/content/registry";
+import { fmtRef, useRefPrices } from "@/lib/ref-prices";
 import { Glyph, StatusBadge } from "./bits";
 
 export type Desk = "perps" | "options";
-type StatusFilter = "all" | "oracle" | "no-oracle";
+type StatusFilter = "all" | "live";
 type Tier = "all" | "featured" | "new";
 
 /**
@@ -35,13 +36,13 @@ export function Catalog({ desk, selected, onSelect }: { desk: Desk; selected: st
     return registry.filter((m) => {
       if (needle && !m.symbol.toLowerCase().includes(needle) && !m.name.toLowerCase().includes(needle)) return false;
       if (sector !== "all" && m.sector !== sector) return false;
-      if (status === "oracle" && !m.oracle) return false;
-      if (status === "no-oracle" && m.oracle) return false;
+      if (status === "live" && m[desk] !== "live") return false;
       if (tier === "featured" && !m.featured) return false;
       if (tier === "new") return false; // listing dates not in registry snapshot yet
       return true;
     });
-  }, [q, sector, status, tier]);
+  }, [q, sector, status, tier, desk]);
+  const prices = useRefPrices();
 
   const chip = (on: boolean) =>
     `h-7 shrink-0 rounded-full border px-3 font-inter text-[12.5px] ${on ? "border-dawn bg-dawn text-void" : "border-white/10 text-haze hover:border-white/30 hover:text-ivory"}`;
@@ -80,9 +81,7 @@ export function Catalog({ desk, selected, onSelect }: { desk: Desk; selected: st
           <button type="button" className={chip(tier === "all")} onClick={() => setTier("all")}>All</button>
           <button type="button" className={chip(tier === "featured")} onClick={() => setTier("featured")}>Featured</button>
           <button type="button" className={chip(tier === "new")} onClick={() => setTier("new")}>Newly listed</button>
-          
-          <button type="button" className={chip(status === "oracle")} onClick={() => setStatus(status === "oracle" ? "all" : "oracle")}>Oracle live</button>
-          <button type="button" className={chip(status === "no-oracle")} onClick={() => setStatus(status === "no-oracle" ? "all" : "no-oracle")}>{app.badgeOracle}</button>
+          <button type="button" className={chip(status === "live")} onClick={() => setStatus(status === "live" ? "all" : "live")}>Live</button>
         </div>
         <div className="flex items-center gap-2">
           <label className="sr-only" htmlFor={`sector-${desk}`}>Sector</label>
@@ -109,10 +108,9 @@ export function Catalog({ desk, selected, onSelect }: { desk: Desk; selected: st
         </div>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_56px_auto] gap-2 border-b border-white/[0.07] px-4 py-2 font-plex text-[10.5px] uppercase tracking-[0.08em] text-smoke">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 border-b border-white/[0.07] px-4 py-2 font-plex text-[10.5px] uppercase tracking-[0.08em] text-smoke">
         <span>Market</span>
-        <span className="text-right">Oracle</span>
-        <span className="text-right">Status</span>
+        <span className="text-right" title={appUi.refPriceTitle}>Price</span>
       </div>
 
       <ul ref={listRef} className="min-h-0 flex-1 overflow-y-auto" aria-label="Market list">
@@ -129,20 +127,22 @@ export function Catalog({ desk, selected, onSelect }: { desk: Desk; selected: st
                   type="button"
                   onClick={() => onSelect(m)}
                   aria-current={on ? "true" : undefined}
-                  className={`grid w-full grid-cols-[minmax(0,1fr)_56px_auto] items-center gap-2 border-b border-white/[0.04] px-4 py-2.5 text-left ${
+                  className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-white/[0.04] px-4 py-2.5 text-left ${
                     on ? "bg-dawn/[0.07]" : "hover:bg-white/[0.03]"
                   }`}
                 >
                   <span className="flex min-w-0 items-center gap-2.5">
                     <Glyph m={m} size={26} />
                     <span className="min-w-0">
-                      <span className="block font-zal text-[13.5px] font-medium tracking-[-0.01em] text-ivory">{m.symbol}</span>
+                      <span className="flex items-center gap-2 font-zal text-[13.5px] font-medium tracking-[-0.01em] text-ivory">
+                        {m.symbol}
+                        <StatusBadge status={m[desk]} />
+                      </span>
                       <span className="block truncate font-inter text-[11.5px] text-haze">{m.name}</span>
                     </span>
                   </span>
-                  <span className="text-right font-plex text-[12.5px] text-smoke" title={appUi.oracleStream}>—</span>
-                  <span className="flex justify-end">
-                    <StatusBadge status={m[desk]} />
+                  <span className="text-right font-plex text-[12.5px] tabular-nums text-ivory" title={appUi.refPriceTitle}>
+                    {prices.data?.q[m.symbol] ? `$${fmtRef(prices.data.q[m.symbol].p)}` : <span className="text-smoke">—</span>}
                   </span>
                 </button>
               </li>

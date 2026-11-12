@@ -35,6 +35,7 @@ const inter = Inter({ variable: "--font-inter-sans", subsets: ["latin"] });
 const plexMono = IBM_Plex_Mono({ variable: "--font-ibm-plex-mono", subsets: ["latin"], weight: ["400", "500"] });
 
 export const metadata: Metadata = {
+  twitter: { card: "summary_large_image", site: "@MeridianDesk33", creator: "@MeridianDesk33" },
   title: "Meridian Desk — Stock Token Perps and Options on Robinhood Chain",
   description:
     "Stock Token Perps and Options. One premium desk. Denim-grade execution on Robinhood Chain. Leverage capped at 2×. Full market catalog.",

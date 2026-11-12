@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { brand } from "@/content/copy";
 import { ACTIVE_CHAIN_ID, chains } from "@/content/chain";
-import { VMark } from "@/components/home/parts";
+import { VMark, XLink } from "@/components/home/parts";
 import { LatencyChip } from "./bits";
 import { WalletButton } from "./wallet";
 
@@ -48,6 +48,7 @@ export function AppHeader() {
           <span className="hidden md:inline-flex">
             <LatencyChip />
           </span>
+          <XLink className="hidden h-8 w-8 items-center justify-center rounded-[4px] text-haze hover:text-ivory sm:inline-flex" />
           <WalletButton />
         </div>
       </div>
