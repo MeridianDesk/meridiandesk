@@ -7,7 +7,7 @@ import { testnetDesk as t } from "@/content/copy";
 import { ACTIVE_CHAIN_ID, txUrl } from "@/content/chain";
 import { deployed, symbolOf, type ListedMarket } from "@/content/deployments";
 import { optionsAbi, registryAbi } from "@/lib/abi";
-import { bs, expiryFor, STRIKE_OFFSETS, TENORS, TESTNET_IV, type Tenor } from "@/lib/bs";
+import { bs, expiryFor, STRIKE_OFFSETS, TENORS, DESK_IV, type Tenor } from "@/lib/bs";
 import { fmtPx, fmtUsd, useOraclePrice, useReady, useSendTx } from "@/lib/onchain";
 import { Row } from "./bits";
 import { FaucetButton, Gate, MAX_RANGE, th, useMounted, useUsdg } from "./live";
@@ -57,7 +57,7 @@ export function LiveOptionsTicket({ symbol, lm }: { symbol: string; lm: ListedMa
   const tY = (expiry - now) / 31_536_000;
   const rows = STRIKE_OFFSETS.map((o) => {
     const strike = Math.round(spot * (1 + o) * 100) / 100;
-    return { o, strike, ...bs(isCall, spot, strike, tY, TESTNET_IV) };
+    return { o, strike, ...bs(isCall, spot, strike, tY, DESK_IV) };
   });
   const sel = rows[k];
   const qty = qtyWad(v);

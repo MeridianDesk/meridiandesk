@@ -272,7 +272,7 @@ export const testnetDesk = {
   // Options (testnet quoter)
   optQty: "Quantity",
   optQtyUnit: "units",
-  optQuoteNote: "Black-Scholes pricing, 60% IV. Quote valid 60 s.",
+  optQuoteNote: `Black-Scholes pricing, ${MAINNET ? 75 : 60}% IV. Quote valid 60 s.`,
   optNotEnabled: "Options open for this market soon.",
   optQuoting: "Fetching quote…",
   optBoughtTitle: "Option bought",

@@ -4,11 +4,11 @@ import { privateKeyToAccount } from "viem/accounts";
 import { ACTIVE_CHAIN_ID } from "@/content/chain";
 import { deployed } from "@/content/deployments";
 import { optionsAbi, oracleAbi, registryAbi } from "@/lib/abi";
-import { bs, expiryFor, STRIKE_OFFSETS, TENORS, TESTNET_IV, type Tenor } from "@/lib/bs";
+import { bs, expiryFor, STRIKE_OFFSETS, TENORS, DESK_IV, type Tenor } from "@/lib/bs";
 import { rhMainnet, rhTestnet } from "@/lib/wagmi";
 
 /**
- * Testnet Options quoter. Prices with flat-IV Black-Scholes off the on-chain oracle mark and
+ * Options quoter (testnet + mainnet). Prices with flat-IV Black-Scholes off the on-chain oracle mark and
  * returns an EIP-712 Quote signed by QUOTER_PK (server-only env, must hold QUOTER_ROLE).
  * The contract re-checks everything (deadline, buyer, nonce, caps, oracle liveness).
  * Dynamic by nature (reads the request); no segment config needed under cacheComponents.
@@ -25,7 +25,7 @@ const QUOTE_TTL = 60; // seconds
 const bad = (error: string, status = 400) => NextResponse.json({ error }, { status });
 
 export async function GET(req: Request) {
-  if (C !== 46630) return bad("Quoter is testnet-only", 403);
+  if (C !== 46630 && C !== 4663) return bad("Unsupported chain", 403);
   const pk = process.env.QUOTER_PK;
   if (!pk || !/^0x[0-9a-fA-F]{64}$/.test(pk)) return bad("Quoter not configured", 503);
   if (!OPTIONS || !ROUTER || !REGISTRY) return bad("Options not deployed", 503);
@@ -58,7 +58,7 @@ export async function GET(req: Request) {
   const spot = Number(spotWad) / 1e18;
   const strikeCents = Math.round(spot * (1 + STRIKE_OFFSETS[k]) * 100);
   const strike = BigInt(strikeCents) * 10n ** 16n;
-  const { premium: unit, delta } = bs(isCall, spot, strikeCents / 100, (expiry - now) / 31_536_000, TESTNET_IV);
+  const { premium: unit, delta } = bs(isCall, spot, strikeCents / 100, (expiry - now) / 31_536_000, DESK_IV);
   // premium in USDG (6 dp), rounded up; floor at 0.01 so deep OTM still prices
   const premium = BigInt(Math.max(10_000, Math.ceil(unit * Number(qty) * 1e6)));
   if (premium > maxPremium) return bad(`Premium above per-option cap (${Number(maxPremium) / 1e6} USDG) — reduce quantity`, 422);
@@ -84,6 +84,6 @@ export async function GET(req: Request) {
     signature,
     spot: spotWad.toString(),
     delta,
-    iv: TESTNET_IV,
+    iv: DESK_IV,
   });
 }

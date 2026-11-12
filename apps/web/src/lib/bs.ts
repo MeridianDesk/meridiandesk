@@ -1,9 +1,11 @@
 /**
- * Black-Scholes (r = 0, no dividends) for the testnet Options quoter.
+ * Black-Scholes (r = 0, no dividends) for the Options quoter.
  * Shared by the server quote route (authoritative, signed) and the ticket (indicative table).
- * TESTNET ONLY — flat IV, no skew / spread. Mainnet pricing needs maintainer sign-off.
+ * Flat IV, no skew / spread. Mainnet runs a wider IV than testnet so the pool is not underpaid.
  */
-export const TESTNET_IV = 0.6;
+import { ACTIVE_CHAIN_ID } from "@/content/chain";
+
+export const DESK_IV = ACTIVE_CHAIN_ID === 4663 ? 0.75 : 0.6;
 export const YEAR = 365 * 24 * 3600;
 
 /** Strike offsets offered by the ticket, relative to the oracle mark. */
@@ -21,7 +23,7 @@ function ncdf(x: number) {
 }
 
 /** Per-unit premium (USD) and delta. */
-export function bs(isCall: boolean, spot: number, strike: number, tYears: number, iv = TESTNET_IV) {
+export function bs(isCall: boolean, spot: number, strike: number, tYears: number, iv = DESK_IV) {
   if (tYears <= 0 || spot <= 0 || strike <= 0) return { premium: Math.max(0, isCall ? spot - strike : strike - spot), delta: 0 };
   const v = iv * Math.sqrt(tYears);
   const d1 = (Math.log(spot / strike) + (v * v) / 2) / v;
