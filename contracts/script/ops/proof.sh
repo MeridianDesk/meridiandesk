@@ -78,7 +78,7 @@ printf 'pool ENGINE_ROLE  OptionsEngine %s\n' "$(ok "$(c "$POOL" 'hasRole(bytes3
 printf 'perps.registry() == MarketRegistry %s\n' "$( [ "$(c "$PERP" 'registry()(address)')" = "$REG" ] && echo 'true  ✓' || echo false)"
 printf 'options.oracle() == OracleRouter   %s\n' "$( [ "$(c "$OPT" 'oracle()(address)')" = "$ORC" ] && echo 'true  ✓' || echo false)"
 if [ "$NET" = mainnet ]; then
-  Q=0x558e58aE6DfA7C3a10b612A21d2b7025c04EC885
+  Q=0xfbAF58D4b25562194d823d56dB131Ad0382eFC9f
   printf 'options QUOTER_ROLE (signing key) %s\n' "$(ok "$(c "$OPT" 'hasRole(bytes32,address)(bool)' "$(cast keccak QUOTER_ROLE)" "$Q")")"
   say "cast call $POOL 'depositCap()(uint256)'"; echo "$(fmt6 "$(c "$POOL" 'depositCap()(uint256)')") USDG pool cap"
 fi

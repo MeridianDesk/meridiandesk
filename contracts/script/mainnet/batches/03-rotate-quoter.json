@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "chainId": "4663",
+  "meta": {
+    "name": "Meridian: rotate options quoter"
+  },
+  "transactions": [
+    {
+      "to": "0xDC44F3e91B782584eEd60D1e3E57F3638217aA21",
+      "value": "0",
+      "data": "0x2f2ff15d9a04aea0a349253cc7277afafdf6ead6729a3972a47ffb40eaef2c93d4e1bfea000000000000000000000000fbaf58d4b25562194d823d56db131ad0382efc9f",
+      "description": "OptionsEngine.grantRole QUOTER_ROLE -> 0xfbAF58D4b25562194d823d56dB131Ad0382eFC9f"
+    },
+    {
+      "to": "0xDC44F3e91B782584eEd60D1e3E57F3638217aA21",
+      "value": "0",
+      "data": "0xd547741f9a04aea0a349253cc7277afafdf6ead6729a3972a47ffb40eaef2c93d4e1bfea000000000000000000000000558e58ae6dfa7c3a10b612a21d2b7025c04ec885",
+      "description": "OptionsEngine.revokeRole QUOTER_ROLE <- 0x558e58aE6DfA7C3a10b612A21d2b7025c04EC885"
+    }
+  ]
+}
