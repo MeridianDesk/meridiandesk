@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { contractFooter } from "@/content/copy";
+import { contractFooter, token } from "@/content/copy";
 import { addressUrl, chains, shortHex, type ChainId } from "@/content/chain";
 import { contractList, deployed } from "@/content/deployments";
 
@@ -62,6 +62,17 @@ export function ContractAddresses({ className = "" }: { className?: string }) {
                 ))}
               </tr>
             ))}
+            <tr className="border-t border-white/[0.06] last:[&>*]:pb-4">
+              <th scope="row" className="py-2.5 pr-6 font-normal">
+                <span className="block text-[13px] text-ivory/90">${token.symbol}</span>
+                <span className="block text-[11.5px] text-smoke">{token.name} token</span>
+              </th>
+              {NETS.map((id) => (
+                <td key={id} className="py-2.5 pr-6">
+                  {id === token.chainId ? <Addr chainId={id} a={token.address} /> : <span className="font-plex text-[12px] text-smoke">—</span>}
+                </td>
+              ))}
+            </tr>
           </tbody>
         </table>
       </div>

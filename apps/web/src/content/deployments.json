@@ -21,6 +21,7 @@
     "LiquidityPool": "0xCcE78f31A7e4743D3EB50E46717416951099283B",
     "PerpsEngine": "0x2d913431a534911Bd04A2eaDb72c62dAE3eDfaE6",
     "OptionsEngine": "0xA108a068e45b86083470f33AC3b8323aaD067360",
+    "CrossMarginAccount": "0x010f7CC647E6374e56f9e07A36ec4b2A087216aD",
     "usdg": "0xab4A7a4A00a0B1392b89E3d378EF2cc661BCB9f6",
     "markets": {
       "AMZN": {

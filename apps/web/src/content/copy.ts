@@ -16,6 +16,15 @@ export const brand = {
   xHandle: "@MeridianDesk33",
 } as const;
 
+/** MRDN token (Robinhood Chain mainnet 4663). Verified on-chain: name "Meridian Desk", symbol MRDN, supply 1,000,000,000. */
+export const token = {
+  symbol: "MRDN",
+  name: "Meridian Desk",
+  chainId: 4663,
+  address: "0x6437614ea1efba0eb4b43bc1af53808722b1cf13",
+  label: "CA",
+} as const;
+
 export const nav = {
   landing: [
     { label: "Perps", href: "#desks" },

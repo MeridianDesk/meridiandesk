@@ -4,6 +4,7 @@ import { clusters, featured } from "@/content/featured";
 import { OptionsArt, PerpsArt } from "@/components/home/desk-art";
 import { LiveExecution } from "@/components/home/live-execution";
 import { ContractAddresses } from "@/components/home/contract-addresses";
+import { TokenCA } from "@/components/home/token-ca";
 import { DeskTicket } from "@/components/home/desk-ticket";
 import { VNav } from "@/components/home/nav";
 import { WaveStage } from "@/components/home/particle-wave";
@@ -46,6 +47,7 @@ export default function Home() {
                   <GhostBtn href="#markets">{hero.secondaryCta}</GhostBtn>
                   {/* <span className="ml-1 rounded-[3px] bg-void/80 px-2 py-1 font-plex text-[11px] uppercase tracking-[0.14em] text-haze">{hero.microLine}</span> */}
                 </div>
+                <TokenCA className="mt-5" />
               </div>
 
               {/* 3D ticket parked on a tipped plane (desktop, tall viewports) */}

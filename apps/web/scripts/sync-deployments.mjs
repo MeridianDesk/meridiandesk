@@ -11,7 +11,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "../../../contracts");
 const src = resolve(root, "deployments");
 const out = resolve(here, "../src/content/deployments.json");
-const keys = ["MarketRegistry", "OracleRouter", "LiquidityPool", "PerpsEngine", "OptionsEngine", "usdg"];
+const keys = ["MarketRegistry", "OracleRouter", "LiquidityPool", "PerpsEngine", "OptionsEngine", "CrossMarginAccount", "usdg"];
 const addr = /^0x[0-9a-fA-F]{40}$/;
 const ZERO = "0x0000000000000000000000000000000000000000";
 const real = (a) => (addr.test(a ?? "") && a !== ZERO ? a : null);
@@ -81,6 +81,7 @@ const abis = {
   perpsAbi: pick(abiOf("PerpsEngine"), ["open", "close", "getPosition", "positionsOf", "positionHealth", "liquidationPrice", "marketConfig", "marketState", "minCollateral", "maxCollateralPerPosition", "frozen", "paused"]),
   poolAbi: pick(abiOf("LiquidityPool"), ["deposit", "redeem", "totalAssets", "freeLiquidity", "utilizationBps", "balanceOf", "maxRedeem", "maxDeposit", "convertToAssets", "decimals"]),
   optionsAbi: pick(abiOf("OptionsEngine"), ["buy", "getOption", "optionsOf", "payoutAt", "maxPayoutOf", "nextOptionId", "maxPremiumPerOption", "minTimeToExpiry", "maxTimeToExpiry", "totalMaxPayout", "totalMaxPayoutCap", "nonceUsed", "paused", "callPayoutCapBps"]),
+  crossAbi: pick(abiOf("CrossMarginAccount"), ["deposit", "withdraw", "setMarginMode", "marginMode", "open", "close", "liquidate", "walletOf", "accountSnapshot", "positionOf", "tokensOf", "marketConfig", "params", "maxWalletPerAccount", "totalWalletCap", "totalWallets", "paused"]),
   registryAbi: pick(abiOf("MarketRegistry"), ["isOptionsEnabled", "isPerpsEnabled"]),
   oracleAbi: pick(abiOf("OracleRouter"), ["price"]),
   // Test USDG (MockERC20) — public mint, testnet only.
