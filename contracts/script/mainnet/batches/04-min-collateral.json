@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "chainId": "4663",
+  "meta": {
+    "name": "Meridian: perps min collateral 0.1 USDG"
+  },
+  "transactions": [
+    {
+      "to": "0xf6b07174CD2244D928e9e012D4703B3984712B6A",
+      "value": "0",
+      "data": "0xcaefb79e00000000000000000000000000000000000000000000000000000000000186a0000000000000000000000000000000000000000000000000000000003b9aca0000000000000000000000000000000000000000000000000000000005d21dba00",
+      "description": "PerpsEngine.setCaps min 0.1 USDG, max 1000/position, total 25k"
+    }
+  ]
+}

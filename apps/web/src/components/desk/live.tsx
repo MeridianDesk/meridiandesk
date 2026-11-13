@@ -431,7 +431,7 @@ export function PoolPanel() {
               disabled={!!tx.busy || c === 0n || balance === undefined || c > balance}
               onClick={async () => {
                 if (needsApprove && !(await tx.send("approve", { address: USDG!, abi: erc20Abi, functionName: "approve", args: [POOL!, maxUint256] }))) return;
-                if (await tx.send("deposit", { address: POOL!, abi: poolAbi, functionName: "deposit", args: [c, address!] }, { title: t.deposit, summary: `${fmtUsd(c)} test USDG → pool` })) setV("");
+                if (await tx.send("deposit", { address: POOL!, abi: poolAbi, functionName: "deposit", args: [c, address!] }, { title: t.deposit, summary: `${fmtUsd(c)} ${t.mainnet ? "USDG" : "test USDG"} → pool` })) setV("");
               }}
               className="h-10 rounded-[4px] bg-dawn px-4 font-inter text-[13.5px] font-medium text-void hover:bg-dawn-hi disabled:opacity-50"
             >
