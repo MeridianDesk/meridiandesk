@@ -10,6 +10,7 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {MarketRegistry} from "../MarketRegistry.sol";
 import {OracleRouter} from "../OracleRouter.sol";
 import {LiquidityPool} from "../LiquidityPool.sol";
+import {InsuranceFund} from "./InsuranceFund.sol";
 import {CrossOptionBook} from "./CrossOptionBook.sol";
 import {CrossMath} from "./CrossMath.sol";
 
@@ -375,8 +376,10 @@ contract CrossMarginAccount is AccessControl, Pausable, ReentrancyGuard {
             walletOf[user] += uint256(net);
             totalWallets += uint256(net);
         } else if (net < 0) {
-            uint256 loss = _debit(user, uint256(-net));
+            uint256 owed = uint256(-net);
+            uint256 loss = _debit(user, owed);
             if (loss > 0) usdg.safeTransfer(address(pool), loss);
+            if (owed > loss) _cover(user, owed - loss);
         }
 
         uint256 f = _debit(user, fee);
@@ -391,8 +394,8 @@ contract CrossMarginAccount is AccessControl, Pausable, ReentrancyGuard {
         if (keeper == address(0)) emit CrossClosed(user, token, sz, px, pnl, funding, f);
     }
 
-    /// @dev Takes up to `amount` from the wallet; any shortfall is recorded as bad debt (pool absorbs in P1,
-    ///      InsuranceFund cover lands in P2). Returns the amount actually taken.
+    /// @dev Takes up to `amount` from the wallet; any shortfall is recorded as bad debt (loss shortfall is
+    ///      then offered to the InsuranceFund, see `_cover`). Returns the amount actually taken.
     function _debit(address user, uint256 amount) internal returns (uint256 taken) {
         uint256 w = walletOf[user];
         taken = amount <= w ? amount : w;
@@ -402,6 +405,15 @@ contract CrossMarginAccount is AccessControl, Pausable, ReentrancyGuard {
             totalBadDebt += amount - taken;
             emit BadDebt(user, amount - taken);
         }
+    }
+
+    /// @dev Loss beyond the wallet: the InsuranceFund pays the pool what it can; the rest stays bad debt.
+    ///      Skipped while `insuranceFund` is not a contract (P1 setups with an EOA fee sink).
+    function _cover(address user, uint256 deficit) internal {
+        if (insuranceFund.code.length == 0) return;
+        try InsuranceFund(insuranceFund).coverDeficit(user, deficit) returns (uint256 paid) {
+            totalBadDebt -= paid;
+        } catch {}
     }
 
     function _removeToken(address user, address token) internal {

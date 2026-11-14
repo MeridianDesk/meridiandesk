@@ -15,6 +15,7 @@ export const contractList = [
   { key: "OptionsEngine", role: "Options buy-to-open" },
   { key: "CrossMarginAccount", role: "Common Ledger · Cross margin account" },
   { key: "CrossOptionBook", role: "Common Ledger · Cross long options" },
+  { key: "InsuranceFund", role: "Common Ledger · Liquidation backstop" },
   { key: "usdg", role: "Collateral token (USDG)" },
 ] as const;
 

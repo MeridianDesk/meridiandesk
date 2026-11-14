@@ -8,12 +8,13 @@ import {LiquidityPool} from "../src/LiquidityPool.sol";
 import {OptionsEngine} from "../src/OptionsEngine.sol";
 import {CrossOptionBook} from "../src/cross/CrossOptionBook.sol";
 import {CrossMarginAccount} from "../src/cross/CrossMarginAccount.sol";
+import {InsuranceFund} from "../src/cross/InsuranceFund.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /// @notice TESTNET ONLY (46630). Deploys Common Ledger P1 (CrossMarginAccount, P2: + Cross long options) next to the existing
 ///         Isolated stack, shares the same LiquidityPool, configures the listed perps markets and
 ///         writes the address into deployments/46630.json (key "CrossMarginAccount").
-///         Insurance fund = admin for P1 (dedicated InsuranceFund contract lands in P2).
+///         Liquidation fees + backstop deficit cover go through a dedicated InsuranceFund (seed it with `contribute`).
 contract DeployCrossTestnet is Script {
     uint256 constant U = 1e6;
     address constant TSLA = 0xC9f9c86933092BbbfFF3CCb4b105A4A94bf3Bd4E;
@@ -33,7 +34,9 @@ contract DeployCrossTestnet is Script {
 
         vm.startBroadcast();
         (, address me,) = vm.readCallers(); // broadcast sender (keystore), not the script's msg.sender
-        CrossMarginAccount cross = new CrossMarginAccount(usdg, registry, router, pool, me, me);
+        InsuranceFund fund = new InsuranceFund(usdg, address(pool), me);
+        CrossMarginAccount cross = new CrossMarginAccount(usdg, registry, router, pool, me, address(fund));
+        fund.grantRole(fund.COVER_ROLE(), address(cross));
         CrossOptionBook book = new CrossOptionBook(cross, options);
         cross.setOptionBook(book);
         pool.grantRole(pool.ENGINE_ROLE(), address(cross));
@@ -56,6 +59,8 @@ contract DeployCrossTestnet is Script {
         vm.writeJson(vm.toString(address(cross)), path, ".CrossMarginAccount");
         vm.writeJson(vm.toString(address(book)), path, ".CrossOptionBook");
         console2.log("CrossMarginAccount", address(cross));
+        vm.writeJson(vm.toString(address(fund)), path, ".InsuranceFund");
         console2.log("CrossOptionBook", address(book));
+        console2.log("InsuranceFund", address(fund));
     }
 }

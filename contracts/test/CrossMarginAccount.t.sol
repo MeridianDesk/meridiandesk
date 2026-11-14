@@ -6,6 +6,7 @@ import {CrossMarginAccount} from "../src/cross/CrossMarginAccount.sol";
 import {CrossMath} from "../src/cross/CrossMath.sol";
 import {OptionsEngine} from "../src/OptionsEngine.sol";
 import {CrossOptionBook} from "../src/cross/CrossOptionBook.sol";
+import {InsuranceFund} from "../src/cross/InsuranceFund.sol";
 
 contract CrossMarginAccountTest is Base {
     CrossMarginAccount cross;
@@ -160,6 +161,39 @@ contract CrossMarginAccountTest is Base {
         assertEq(cross.walletOf(alice), 0);
         assertGt(cross.totalBadDebt(), 0);
         assertEq(pool.reserved(), 0);
+    }
+
+    /// Backstop loss beyond the wallet: InsuranceFund pays the pool what it holds, the rest stays bad debt.
+    function test_insuranceFundCoversDeficit() public {
+        vm.startPrank(admin);
+        InsuranceFund fund = new InsuranceFund(usdg, address(pool), admin);
+        fund.grantRole(fund.COVER_ROLE(), address(cross));
+        (uint16 mm, uint16 hc, uint16 wf, uint16 bs) = cross.params();
+        (uint16 pb, uint32 cd, uint16 inf, uint16 kf) = cross.liqConfig();
+        cross.setParams(CrossMath.Params(mm, hc, wf, bs), CrossMarginAccount.LiqConfig(pb, cd, inf, kf), address(fund));
+        vm.stopPrank();
+        usdg.mint(address(this), 100 * U);
+        usdg.approve(address(fund), 100 * U);
+        fund.contribute(100 * U);
+
+        vm.prank(alice);
+        cross.deposit(1_000 * U);
+        _open(alice, 1_000 * U, 20_000, true); // 2,000 notional @ 400
+        _setPrice(150e8); // loss 1,250 vs wallet 1,000 → deficit 250
+        uint256 pb0 = usdg.balanceOf(address(pool));
+        vm.prank(keeper);
+        cross.liquidate(alice);
+        assertEq(fund.totalCovered(), 100 * U);
+        assertEq(fund.totalUncovered(), 150 * U);
+        assertEq(fund.balance(), 0);
+        assertEq(usdg.balanceOf(address(pool)) - pb0, 1_100 * U); // wallet 1,000 + fund 100
+        assertEq(cross.totalBadDebt(), 150 * U + 10 * U); // uncovered loss + unpaid liq fees (0.50% of 2,000)
+    }
+
+    function test_insuranceFundOnlyEngineCovers() public {
+        InsuranceFund fund = new InsuranceFund(usdg, address(pool), admin);
+        vm.expectRevert();
+        fund.coverDeficit(alice, 1);
     }
 
     function test_crossNeverTouchesIsolated() public {

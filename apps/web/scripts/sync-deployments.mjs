@@ -11,7 +11,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "../../../contracts");
 const src = resolve(root, "deployments");
 const out = resolve(here, "../src/content/deployments.json");
-const keys = ["MarketRegistry", "OracleRouter", "LiquidityPool", "PerpsEngine", "OptionsEngine", "CrossMarginAccount", "CrossOptionBook", "usdg"];
+const keys = ["MarketRegistry", "OracleRouter", "LiquidityPool", "PerpsEngine", "OptionsEngine", "CrossMarginAccount", "CrossOptionBook", "InsuranceFund", "usdg"];
 const addr = /^0x[0-9a-fA-F]{40}$/;
 const ZERO = "0x0000000000000000000000000000000000000000";
 const real = (a) => (addr.test(a ?? "") && a !== ZERO ? a : null);
