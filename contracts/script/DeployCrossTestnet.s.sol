@@ -5,10 +5,12 @@ import {Script, console2} from "forge-std/Script.sol";
 import {MarketRegistry} from "../src/MarketRegistry.sol";
 import {OracleRouter} from "../src/OracleRouter.sol";
 import {LiquidityPool} from "../src/LiquidityPool.sol";
+import {OptionsEngine} from "../src/OptionsEngine.sol";
+import {CrossOptionBook} from "../src/cross/CrossOptionBook.sol";
 import {CrossMarginAccount} from "../src/cross/CrossMarginAccount.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-/// @notice TESTNET ONLY (46630). Deploys Common Ledger P1 (CrossMarginAccount) next to the existing
+/// @notice TESTNET ONLY (46630). Deploys Common Ledger P1 (CrossMarginAccount, P2: + Cross long options) next to the existing
 ///         Isolated stack, shares the same LiquidityPool, configures the listed perps markets and
 ///         writes the address into deployments/46630.json (key "CrossMarginAccount").
 ///         Insurance fund = admin for P1 (dedicated InsuranceFund contract lands in P2).
@@ -25,11 +27,17 @@ contract DeployCrossTestnet is Script {
         OracleRouter router = OracleRouter(vm.parseJsonAddress(dep, ".OracleRouter"));
         LiquidityPool pool = LiquidityPool(vm.parseJsonAddress(dep, ".LiquidityPool"));
         IERC20 usdg = IERC20(vm.parseJsonAddress(dep, ".usdg"));
+        OptionsEngine options = OptionsEngine(vm.parseJsonAddress(dep, ".OptionsEngine"));
+        // P2 redeploy: the P1 account (if any) loses pool access.
+        address old = vm.keyExistsJson(dep, ".CrossMarginAccount") ? vm.parseJsonAddress(dep, ".CrossMarginAccount") : address(0);
 
         vm.startBroadcast();
         (, address me,) = vm.readCallers(); // broadcast sender (keystore), not the script's msg.sender
         CrossMarginAccount cross = new CrossMarginAccount(usdg, registry, router, pool, me, me);
+        CrossOptionBook book = new CrossOptionBook(cross, options);
+        cross.setOptionBook(book);
         pool.grantRole(pool.ENGINE_ROLE(), address(cross));
+        if (old != address(0) && pool.hasRole(pool.ENGINE_ROLE(), old)) pool.revokeRole(pool.ENGINE_ROLE(), old);
 
         CrossMarginAccount.MarketConfig memory cfg = CrossMarginAccount.MarketConfig({
             maxOiLong: uint128(4_000 * U),
@@ -46,6 +54,8 @@ contract DeployCrossTestnet is Script {
         vm.stopBroadcast();
 
         vm.writeJson(vm.toString(address(cross)), path, ".CrossMarginAccount");
+        vm.writeJson(vm.toString(address(book)), path, ".CrossOptionBook");
         console2.log("CrossMarginAccount", address(cross));
+        console2.log("CrossOptionBook", address(book));
     }
 }

@@ -13,6 +13,8 @@ export const contractList = [
   { key: "LiquidityPool", role: "Shared USDG pool" },
   { key: "PerpsEngine", role: "Perps positions, max 2×" },
   { key: "OptionsEngine", role: "Options buy-to-open" },
+  { key: "CrossMarginAccount", role: "Common Ledger · Cross margin account" },
+  { key: "CrossOptionBook", role: "Common Ledger · Cross long options" },
   { key: "usdg", role: "Collateral token (USDG)" },
 ] as const;
 

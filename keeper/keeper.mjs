@@ -154,8 +154,10 @@ async function settle() {
     const [feed] = await pub.readContract({ address: dep.MarketRegistry, abi: regAbi, functionName: "oracleOf", args: [o.token] });
     const round = await bracketRound(feed, o.expiry);
     if (round === null) { log("settle", `#${id} expired, no bracketing round yet`); continue; }
-    log("settle", `#${id} ${o.isCall ? "call" : "put"} expiry ${o.expiry} → round ${round}`);
-    await send(keeper, "settle", { address: dep.OptionsEngine, abi: optAbi, functionName: "settle", args: [BigInt(id), round] });
+    // Cross long options are held by CrossOptionBook: settle through it so the payout lands in the Cross wallet.
+    const viaBook = dep.CrossOptionBook && o.owner.toLowerCase() === dep.CrossOptionBook.toLowerCase();
+    log("settle", `#${id} ${o.isCall ? "call" : "put"}${viaBook ? " (Cross)" : ""} expiry ${o.expiry} → round ${round}`);
+    await send(keeper, "settle", { address: viaBook ? dep.CrossOptionBook : dep.OptionsEngine, abi: optAbi, functionName: "settle", args: [BigInt(id), round] });
   }
   log("settle", `scanned ${next - 1} ids · ${pending} awaiting settlement`);
 }

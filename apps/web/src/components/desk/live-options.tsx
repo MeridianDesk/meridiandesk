@@ -6,11 +6,13 @@ import { usePublicClient, useReadContract, useReadContracts } from "wagmi";
 import { testnetDesk as t } from "@/content/copy";
 import { ACTIVE_CHAIN_ID, txUrl } from "@/content/chain";
 import { deployed, symbolOf, type ListedMarket } from "@/content/deployments";
-import { optionsAbi, registryAbi } from "@/lib/abi";
+import { crossBookAbi, optionsAbi, registryAbi } from "@/lib/abi";
+import { crossUi as cx } from "@/content/copy";
 import { bs, expiryFor, STRIKE_OFFSETS, TENORS, DESK_IV, type Tenor } from "@/lib/bs";
 import { fmtPx, fmtUsd, useOraclePrice, useReady, useSendTx } from "@/lib/onchain";
 import { Row } from "./bits";
 import { FaucetButton, Gate, MAX_RANGE, th, useMounted, useUsdg } from "./live";
+import { BOOK, useCrossAccount } from "./cross";
 
 const C = ACTIVE_CHAIN_ID;
 const OPTIONS = deployed(C, "OptionsEngine");
@@ -42,9 +44,14 @@ export function LiveOptionsTicket({ symbol, lm }: { symbol: string; lm: ListedMa
   const [v, setV] = useState("");
   const [quoting, setQuoting] = useState(false);
   const [qErr, setQErr] = useState<string | null>(null);
+  const [margin, setMargin] = useState<"isolated" | "cross">("isolated");
   const { address } = useReady();
+  const crossAcct = useCrossAccount();
+  const isCross = !!BOOK && margin === "cross";
   const { price, error: pxErr } = useOraclePrice(lm.token);
-  const { balance, allowance } = useUsdg(OPTIONS);
+  const usdgState = useUsdg(OPTIONS);
+  const balance = isCross ? crossAcct.wallet : usdgState.balance;
+  const allowance = isCross ? maxUint256 : usdgState.allowance;
   const tx = useSendTx();
   const en = useReadContract({ address: REGISTRY ?? undefined, abi: registryAbi, functionName: "isOptionsEnabled", args: [lm.token], chainId: C, query: { enabled: !!REGISTRY } });
   const caps = useReadContract({ address: OPTIONS ?? undefined, abi: optionsAbi, functionName: "maxPremiumPerOption", chainId: C, query: { enabled: !!OPTIONS } });
@@ -68,7 +75,7 @@ export function LiveOptionsTicket({ symbol, lm }: { symbol: string; lm: ListedMa
   const needsApprove = allowance !== undefined && estPremium > 0n && allowance < estPremium * 2n;
   const overCap = caps.data !== undefined && estPremium > caps.data;
   const enabled = en.data === true;
-  const canSend = enabled && !!price && !pxErr && qty > 0n && !overCap && balance !== undefined && estPremium <= balance && !tx.busy && !quoting;
+  const canSend = enabled && !!price && !pxErr && qty > 0n && !overCap && balance !== undefined && estPremium <= balance && !tx.busy && !quoting && !(isCross && crossAcct.stale);
 
   async function submit() {
     setQErr(null);
@@ -76,7 +83,7 @@ export function LiveOptionsTicket({ symbol, lm }: { symbol: string; lm: ListedMa
     setQuoting(true);
     let res: { quote?: Record<string, string>; signature?: `0x${string}`; error?: string };
     try {
-      const r = await fetch(`/api/quote?${new URLSearchParams({ buyer: address!, token: lm.token, type: kind, tenor, strike: String(k), qty: v })}`, { cache: "no-store" });
+      const r = await fetch(`/api/quote?${new URLSearchParams({ buyer: address!, token: lm.token, type: kind, tenor, strike: String(k), qty: v, ...(isCross ? { mode: "cross" } : {}) })}`, { cache: "no-store" });
       res = await r.json();
     } catch {
       res = { error: "Quoter unreachable" };
@@ -86,13 +93,26 @@ export function LiveOptionsTicket({ symbol, lm }: { symbol: string; lm: ListedMa
     if (!res.quote || !res.signature) return setQErr(res.error ?? "No quote");
     const q = res.quote;
     const quote: Quote = { buyer: q.buyer as `0x${string}`, token: q.token as `0x${string}`, isCall: String(q.isCall) === "true", strike: BigInt(q.strike), expiry: BigInt(q.expiry), quantity: BigInt(q.quantity), premium: BigInt(q.premium), deadline: BigInt(q.deadline), nonce: BigInt(q.nonce) };
-    if (balance !== undefined && quote.premium > balance) return setQErr("Premium exceeds balance");
-    if (await tx.send("buy", { address: OPTIONS!, abi: optionsAbi, functionName: "buy", args: [quote, res.signature] }, { title: t.optBoughtTitle, summary: `${symbol} ${isCall ? "Call" : "Put"} ${fmtPx(quote.strike)} · ${tenor} · premium ${fmtUsd(quote.premium)} USDG` })) setV("");
+    if (balance !== undefined && quote.premium > balance) return setQErr(isCross ? cx.optNoCrossBalance : "Premium exceeds balance");
+    const summary = { title: t.optBoughtTitle, summary: `${symbol} ${isCall ? "Call" : "Put"} ${fmtPx(quote.strike)} · ${tenor} · premium ${fmtUsd(quote.premium)} USDG${isCross ? ` · ${cx.cross}` : ""}` };
+    const ok = isCross
+      ? await tx.send("buy", { address: BOOK!, abi: crossBookAbi, functionName: "buy", args: [quote, res.signature] }, summary)
+      : await tx.send("buy", { address: OPTIONS!, abi: optionsAbi, functionName: "buy", args: [quote, res.signature] }, summary);
+    if (ok) setV("");
   }
 
   if (en.isSuccess && !enabled) return <p className="rounded-[5px] border border-white/[0.08] px-3 py-2.5 font-inter text-[12.5px] text-haze">{t.optNotEnabled}</p>;
   return (
     <div className="space-y-4">
+      {BOOK ? (
+        <div>
+          <div className="flex gap-1.5" role="radiogroup" aria-label={cx.modeLabel}>
+            <button type="button" role="radio" aria-checked={!isCross} className={seg(!isCross, "ivory")} onClick={() => setMargin("isolated")}>{cx.isolated}</button>
+            <button type="button" role="radio" aria-checked={isCross} className={seg(isCross)} onClick={() => setMargin("cross")}>{cx.cross}</button>
+          </div>
+          <p className="mt-1.5 font-inter text-[11.5px] text-smoke">{isCross ? cx.optCrossHelp : cx.optIsolatedHelp}</p>
+        </div>
+      ) : null}
       <div className="flex gap-1.5" role="group" aria-label="Option type">
         <button type="button" aria-pressed={isCall} className={seg(isCall)} onClick={() => setKind("call")}>Call</button>
         <button type="button" aria-pressed={!isCall} className={seg(!isCall, "ivory")} onClick={() => setKind("put")}>Put</button>
@@ -124,7 +144,7 @@ export function LiveOptionsTicket({ symbol, lm }: { symbol: string; lm: ListedMa
       <div>
         <label htmlFor="opt-qty" className="mb-1.5 flex justify-between font-inter text-[12.5px] text-haze">
           <span>{t.optQty}</span>
-          <span className="font-plex text-[11px] text-smoke">Balance {balance !== undefined ? fmtUsd(balance) : "—"}</span>
+          <span className="font-plex text-[11px] text-smoke">{isCross ? cx.optFromCross : "Balance"} {balance !== undefined ? fmtUsd(balance) : "—"}</span>
         </label>
         <div className="flex h-10 items-center rounded-[4px] border border-white/10 bg-void px-3 focus-within:border-dawn/60">
           <input id="opt-qty" inputMode="decimal" value={v} onChange={(e) => setV(e.target.value.replace(/[^0-9.]/g, ""))} placeholder="0.00" className="h-full w-full bg-transparent font-plex text-[14px] text-ivory placeholder:text-smoke focus:outline-none" />

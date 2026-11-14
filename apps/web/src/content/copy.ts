@@ -290,6 +290,72 @@ export const testnetDesk = {
   awaitingSettle: "Awaiting settlement",
 } as const;
 
+/**
+ * Common Ledger (Cross margin) in-app copy. Strings marked §13.6 are verbatim from spec;
+ * the rest is Draft copy. P1 = Cross Perps only; options join Cross equity in P2.
+ */
+export const crossUi = {
+  feature: "Common Ledger",
+  isolated: "Isolated",
+  cross: "Cross",
+  modeLabel: "Margin mode",
+  isolatedHelp: "Only the margin assigned to this position is at risk.", // §13.6
+  crossHelp: "Shares your USDG Common Ledger with your other Cross Perps and Options. One loss can liquidate the whole Cross account.", // §13.6
+  dialogTitle: "Switch to Cross?", // §13.6
+  dialogBody: "Cross uses one USDG account for your Cross positions on both desks. Profits or eligible long-option value can support other Cross positions. A single loss can liquidate the entire Cross account. Isolated positions stay separate. This is not risk-free.", // §13.6
+  dialogAck: "I understand one loss can liquidate the whole Cross account.",
+  dontShow: "Don’t show again",
+  useIsolated: "Use Isolated", // §13.6
+  useCross: "Use Cross", // §13.6
+  locked: "Close this position and any open orders to switch mode.", // §13.6
+  switching: "Switching mode…",
+  ratioHelp: "Liquidation at 100% margin ratio. Keep this well below 80%.", // §13.6
+  optionTip: "Long options count toward Cross equity after a haircut. This is not risk-free collateral and it is not portfolio margin.", // §13.6
+  stale: "Oracle stale — new risk paused. You can still reduce or close.", // §13.6
+  backstop: "If liquidation cannot keep the account above maintenance, a backstop may take over remaining Cross positions. This is not a personal insurance policy.", // §13.6
+  withdrawBlocked: "Withdrawal would leave the Cross account below the margin requirement.", // §13.6
+  isolatedApart: "Isolated margin is not included in Cross equity.", // §13.6
+  crossLiqNote: "Cross liquidation depends on the whole account, so it can move as your other Cross positions move.",
+  optionsSoon: "Options positions stay Isolated until they join the Common Ledger.",
+  // P2 — Cross long options (PENDING maintainer)
+  optIsolatedHelp: "Premium is paid from your wallet. The option stays outside the Cross account.",
+  optCrossHelp: "Premium is paid from your Cross account. The option's value after haircut counts toward Cross equity. Long options only.",
+  optFromCross: "Paid from Cross account",
+  optCountedNote: "Counted at intrinsic value after haircut. 0 once expired or while the oracle is stale.",
+  optNoCrossBalance: "Not enough Cross wallet balance for this premium.",
+  crossOptions: "Cross options",
+  counted: "Counted",
+  settle: "Settle",
+  settling: "Settling…",
+  settledTitle: "Option settled to Cross account",
+  awaitingRound: "Awaiting expiry price",
+  cardTitle: "Cross account",
+  cardSub: "One USDG balance backing your Cross positions.",
+  wallet: "Wallet",
+  upnl: "Perps uPnL",
+  optionValue: "Option value (after haircut)",
+  equity: "Equity",
+  im: "Initial margin",
+  mm: "Maintenance margin",
+  ratio: "Margin ratio",
+  free: "Free collateral",
+  withdrawable: "Withdrawable",
+  deposit: "Deposit",
+  withdraw: "Withdraw",
+  max: "Max",
+  margin: "Margin",
+  imAfter: "Initial margin after",
+  ratioAfter: "Margin ratio after",
+  insufficient: "Not enough free collateral in the Cross account.",
+  emptyWallet: "Deposit USDG into the Cross account to trade Cross.",
+  noPositions: "No open Cross positions.",
+  depositedTitle: "Deposited to Cross account",
+  withdrawnTitle: "Withdrawn from Cross account",
+  modeSetTitle: "Margin mode updated",
+  liquidatable: "Liquidating — new risk is blocked. You can still reduce or close.",
+  notDeployed: "Cross margin is not live on this network yet.",
+} as const;
+
 /** Draft copy — tx success popup. */
 export const txReceipt = {
   title: "Transaction confirmed",

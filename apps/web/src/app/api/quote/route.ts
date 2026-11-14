@@ -19,6 +19,7 @@ const chain = C === rhTestnet.id ? rhTestnet : rhMainnet;
 const OPTIONS = deployed(C, "OptionsEngine");
 const ROUTER = deployed(C, "OracleRouter");
 const REGISTRY = deployed(C, "MarketRegistry");
+const BOOK = deployed(C, "CrossOptionBook"); // Common Ledger: Cross long options are held by the book
 const QUOTE_TTL = 60; // seconds
 
 
@@ -37,7 +38,9 @@ export async function GET(req: Request) {
   const tenor = q.get("tenor") as Tenor;
   const k = Number(q.get("strike"));
   const qty = q.get("qty") ?? "";
+  const cross = q.get("mode") === "cross";
   if (!isAddress(buyer) || !isAddress(token)) return bad("Bad address");
+  if (cross && !BOOK) return bad("Cross options not deployed", 503);
   if (!(tenor in TENORS)) return bad("Bad expiry");
   if (!Number.isInteger(k) || k < 0 || k >= STRIKE_OFFSETS.length) return bad("Bad strike");
   if (!/^\d+(\.\d{1,6})?$/.test(qty)) return bad("Bad quantity");
@@ -63,8 +66,10 @@ export async function GET(req: Request) {
   const premium = BigInt(Math.max(10_000, Math.ceil(unit * Number(qty) * 1e6)));
   if (premium > maxPremium) return bad(`Premium above per-option cap (${Number(maxPremium) / 1e6} USDG) — reduce quantity`, 422);
 
-  const nonce = BigInt(`0x${Buffer.from(crypto.getRandomValues(new Uint8Array(31))).toString("hex")}`);
-  const quote = { buyer, token, isCall, strike, expiry: BigInt(expiry), quantity, premium, deadline: BigInt(now + QUOTE_TTL), nonce };
+  const rand = BigInt(`0x${Buffer.from(crypto.getRandomValues(new Uint8Array(cross ? 12 : 31))).toString("hex")}`);
+  // Cross: the book is the on-chain buyer; the trader sits in the top 160 bits of the nonce so only they can fill it.
+  const nonce = cross ? (BigInt(buyer) << 96n) | rand : rand;
+  const quote = { buyer: cross ? BOOK! : buyer, token, isCall, strike, expiry: BigInt(expiry), quantity, premium, deadline: BigInt(now + QUOTE_TTL), nonce };
   const account = privateKeyToAccount(pk as `0x${string}`);
   const signature = await account.signTypedData({
     domain: { name: "Meridian Desk Options", version: "1", chainId: C, verifyingContract: OPTIONS },

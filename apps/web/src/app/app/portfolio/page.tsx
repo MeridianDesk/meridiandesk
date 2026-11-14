@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { appUi } from "@/content/copy";
 import { LivePositions, PoolPanel } from "@/components/desk/live";
+import { CrossAccountCard, CrossOptionsPositions, CrossPositions } from "@/components/desk/cross";
 
 export const metadata = { title: "Portfolio — Meridian Desk" };
 
@@ -32,6 +33,8 @@ export default function Portfolio() {
         <h1 className="font-zal text-[28px] font-semibold tracking-[-0.025em] text-ivory">Portfolio</h1>
         <p className="mt-1 font-inter text-[14px] text-haze">Perps and Options are separate products with separate risk. They are shown separately here too.</p>
       </div>
+      <CrossAccountCard />
+      <section aria-label="Cross positions" className="rounded-[8px] border border-white/[0.08] bg-char empty:hidden"><CrossPositions /><CrossOptionsPositions /></section>
       <Block title="Perps" desk="perps" />
       <Block title="Options" desk="options" />
       <PoolPanel />

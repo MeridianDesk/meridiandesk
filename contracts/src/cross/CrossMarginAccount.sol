@@ -10,10 +10,15 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {MarketRegistry} from "../MarketRegistry.sol";
 import {OracleRouter} from "../OracleRouter.sol";
 import {LiquidityPool} from "../LiquidityPool.sol";
+import {CrossOptionBook} from "./CrossOptionBook.sol";
 import {CrossMath} from "./CrossMath.sol";
 
-/// @title CrossMarginAccount — Common Ledger (P1: Cross perps)
-/// @notice One USDG Cross wallet per user that backs all of that user's Cross perps positions.
+/// @title CrossMarginAccount — Common Ledger (P1 Cross perps + P2 long options)
+/// @notice One USDG Cross wallet per user that backs all of that user's Cross perps positions and
+///         Cross long options. Long options are bought through CrossOptionBook (the holder on OptionsEngine):
+///         the premium leaves the Cross wallet, the option's value (intrinsic at the fresh oracle
+///         mark, capped at max payout, minus optionHaircutBps) counts toward Cross equity, IM = MM = 0.
+///         Withdrawals are capped at the wallet (unrealised value never leaves as cash). Short options: none (A).
 ///         Standard cross margin (Binance-style), not portfolio margin: IM/MM summed per leg.
 ///         Isolated perps stay in PerpsEngine and are never touched by this contract.
 ///         Counterparty = the shared LiquidityPool; each position reserves its notional (max profit).
@@ -85,6 +90,7 @@ contract CrossMarginAccount is AccessControl, Pausable, ReentrancyGuard {
     mapping(address user => mapping(address token => Position)) private _pos;
     mapping(address user => address[]) private _tokens;
     mapping(address user => uint64) public lastLiquidationAt;
+    CrossOptionBook public optionBook;
 
     uint256 public totalWallets;
     uint256 public maxWalletPerAccount;
@@ -133,9 +139,16 @@ contract CrossMarginAccount is AccessControl, Pausable, ReentrancyGuard {
     error Slippage(uint256 price, uint256 acceptablePrice);
     error NotLiquidatable();
     error LiquidationCooldown(uint256 readyAt);
+    error NotBook();
 
-    constructor(IERC20 usdg_, MarketRegistry registry_, OracleRouter oracle_, LiquidityPool pool_, address admin, address insurance)
-    {
+    constructor(
+        IERC20 usdg_,
+        MarketRegistry registry_,
+        OracleRouter oracle_,
+        LiquidityPool pool_,
+        address admin,
+        address insurance
+    ) {
         if (admin == address(0) || insurance == address(0) || address(usdg_) == address(0)) revert ZeroAddress();
         usdg = usdg_;
         registry = registry_;
@@ -164,8 +177,10 @@ contract CrossMarginAccount is AccessControl, Pausable, ReentrancyGuard {
     /// @notice Withdraw from the Cross wallet. Needs fresh prices for every Cross position.
     function withdraw(uint256 amount) external nonReentrant {
         if (amount == 0) revert ZeroAmount();
-        CrossMath.Snapshot memory s = _snapshot(msg.sender);
-        if (amount > s.withdrawable) revert WithdrawExceeds(amount, s.withdrawable);
+        // Brief §6.6 U4: fresh option value (after haircut) counts toward the withdraw check; the amount is
+        // still capped at the wallet, so unrealised value itself never leaves as cash.
+        uint256 wa = _snapshot(msg.sender).withdrawable;
+        if (amount > wa) revert WithdrawExceeds(amount, wa);
         walletOf[msg.sender] -= amount;
         totalWallets -= amount;
         usdg.safeTransfer(msg.sender, amount);
@@ -245,6 +260,39 @@ contract CrossMarginAccount is AccessControl, Pausable, ReentrancyGuard {
         if (p.isLong ? px < acceptablePrice : px > acceptablePrice) revert Slippage(px, acceptablePrice);
         uint256 fee = sizeToClose * marketConfig[token].closeFeeBps / BPS;
         _reduce(msg.sender, token, sizeToClose, px, fee, address(0), 0);
+    }
+
+    // ───────────────────────────── Cross long options (P2) ─────────────────────────────
+    // The option logic lives in CrossOptionBook (holder of the options on OptionsEngine) to keep this
+    // contract under EIP-170. The book can only move a user's wallet when that user buys (premium out)
+    // or when an option settles (payout in); it never touches perps positions.
+
+    modifier onlyBook() {
+        if (msg.sender != address(optionBook)) revert NotBook();
+        _;
+    }
+
+    /// @notice Premium leaves the Cross wallet to the book (which pays OptionsEngine in the same tx).
+    function debitPremium(address user, uint256 amount) external onlyBook {
+        uint256 w = walletOf[user];
+        if (amount > w) revert InsufficientMargin(w, amount);
+        walletOf[user] = w - amount;
+        totalWallets -= amount;
+        usdg.safeTransfer(msg.sender, amount);
+    }
+
+    /// @notice Settlement payout / void refund comes back into the Cross wallet.
+    function creditPayout(address user, uint256 amount) external onlyBook {
+        if (amount == 0) return;
+        usdg.safeTransferFrom(msg.sender, address(this), amount);
+        walletOf[user] += amount;
+        totalWallets += amount;
+    }
+
+    /// @notice One-time wiring of the option book (0 = options not part of Cross yet).
+    function setOptionBook(CrossOptionBook book) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (address(optionBook) != address(0)) revert InvalidConfig();
+        optionBook = book;
     }
 
     // ───────────────────────────── liquidation ─────────────────────────────
@@ -389,7 +437,10 @@ contract CrossMarginAccount is AccessControl, Pausable, ReentrancyGuard {
                 leverageBps: p.leverageBps
             });
         }
-        return CrossMath.snapshot(params, walletOf[user], legs, new CrossMath.OptionLeg[](0), 0);
+        CrossMath.OptionLeg[] memory ol = address(optionBook) != address(0)
+            ? optionBook.legsOf(user)
+            : new CrossMath.OptionLeg[](0);
+        return CrossMath.snapshot(params, walletOf[user], legs, ol, 0);
     }
 
     function _projectedFunding(address token) internal view returns (uint256 cl, uint256 cs) {

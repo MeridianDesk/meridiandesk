@@ -210,7 +210,7 @@ function PositionRow({ id, p }: { id: bigint; p: Pos }) {
   const td = "px-3 py-2.5 font-plex text-[12.5px] whitespace-nowrap";
   return (
     <tr className="border-t border-white/[0.05]">
-      <td className={`${td} text-ivory`}>{sym} <span className={p.isLong ? "text-dawn" : "text-ivory/70"}>{p.isLong ? "Long" : "Short"}</span> {p.leverageBps / 10_000}×</td>
+      <td className={`${td} text-ivory`}>{sym} <span className={p.isLong ? "text-dawn" : "text-ivory/70"}>{p.isLong ? "Long" : "Short"}</span> <span className="rounded-[3px] border border-white/15 px-1 text-[11px] text-haze">{p.leverageBps / 10_000}× Isolated</span></td>
       <td className={`${td} text-right text-ivory`}>{fmtUsd(p.size)}</td>
       <td className={`${td} text-right text-haze`}>{fmtUsd(p.collateral)}</td>
       <td className={`${td} text-right text-haze`}>{fmtPx(p.entryPrice)}</td>
@@ -228,7 +228,7 @@ function PositionRow({ id, p }: { id: bigint; p: Pos }) {
 }
 
 /** The wallet's Perps position ids + structs (open and closed), read from PerpsEngine. */
-function useWalletPositions() {
+export function useWalletPositions() {
   const { address, onChain } = useReady();
   const ids = useReadContract({ address: PERPS ?? undefined, abi: perpsAbi, functionName: "positionsOf", args: address ? [address] : undefined, chainId: C, query: { enabled: !!PERPS && !!address && onChain, refetchInterval: 15_000 } });
   const list = (ids.data ?? []) as readonly bigint[];

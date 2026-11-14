@@ -11,7 +11,8 @@ import { Glyph, Row, short, StatusBadge } from "./bits";
 import { Catalog, type Desk } from "./catalog";
 import { OptionsTicket, PerpsTicket, TicketHeader } from "./tickets";
 import { LiveOptionsHistory, LiveOptionsPositions, LiveOptionsTicket } from "./live-options";
-import { LiveHistory, LiveMark, LivePerpsTicket, LivePositions, useMarketStats } from "./live";
+import { LiveHistory, LiveMark, LivePositions, useMarketStats } from "./live";
+import { CrossAccountCard, CrossHistory, CrossOptionsPositions, CrossPositions, PerpsDeskTicket } from "./cross";
 import { ago, fmtPx, fmtUsd, useOraclePrice } from "@/lib/onchain";
 import { change24h, usePriceHistory } from "@/lib/price-history";
 import { PriceChart } from "./price-chart";
@@ -170,7 +171,7 @@ function Positions({ desk, live, token, symbol }: { desk: Desk; live: boolean; t
           </div>
         ) : null}
       </div>
-      {!live ? <p className="px-5 py-6 font-inter text-[13px] text-haze">{appUi.portfolioEmpty}</p> : desk === "options" ? (tab === "positions" ? <LiveOptionsPositions token={filter} /> : <LiveOptionsHistory token={filter} />) : tab === "positions" ? <LivePositions token={filter} /> : <LiveHistory token={filter} />}
+      {!live ? <p className="px-5 py-6 font-inter text-[13px] text-haze">{appUi.portfolioEmpty}</p> : desk === "options" ? (tab === "positions" ? <><CrossOptionsPositions token={filter} /><LiveOptionsPositions token={filter} /></> : <><CrossHistory token={filter} /><LiveOptionsHistory token={filter} /></>) : tab === "positions" ? <><CrossPositions token={filter} /><LivePositions token={filter} /></> : <><CrossHistory token={filter} /><LiveHistory token={filter} /></>}
     </section>
   );
 }
@@ -197,8 +198,9 @@ export function DeskView({ desk, symbol }: { desk: Desk; symbol?: string }) {
       <aside aria-label="Order ticket" className="order-2 min-h-0 overflow-y-auto border-white/[0.07] lg:order-3 lg:border-l max-lg:border-t">
         <TicketHeader desk={desk} />
         <div className="p-4">
-          {desk === "perps" ? (live && lm ? <LivePerpsTicket key={m.symbol} symbol={m.symbol} lm={lm} /> : <PerpsTicket key={m.symbol} m={m} />) : live && lm ? <LiveOptionsTicket key={m.symbol} symbol={m.symbol} lm={lm} /> : <OptionsTicket key={m.symbol} m={m} />}
+          {desk === "perps" ? (live && lm ? <PerpsDeskTicket key={m.symbol} symbol={m.symbol} lm={lm} /> : <PerpsTicket key={m.symbol} m={m} />) : live && lm ? <LiveOptionsTicket key={m.symbol} symbol={m.symbol} lm={lm} /> : <OptionsTicket key={m.symbol} m={m} />}
         </div>
+        {live ? <div className="px-4 pb-4"><CrossAccountCard compact /></div> : null}
         <p className="px-4 pb-4 font-plex text-[10.5px] uppercase tracking-[0.1em] text-smoke">{live ? testnetDesk.illustrative : "Values appear once this market's oracle feed is live"}</p>
       </aside>
     </div>
