@@ -489,7 +489,7 @@ const ev = {
   os: parseAbiItem("event CrossOptionSettled(address indexed user, uint256 indexed optionId, uint256 credited)"),
 };
 /** First block worth scanning per chain (Cross deployment). Unknown chains scan the last 200k blocks. */
-const CROSS_FROM: Record<number, bigint> = { 46630: 153_074_475n };
+const CROSS_FROM: Record<number, bigint> = { 46630: 153_088_089n };
 
 type XRow = { kind: string; block: string; tx: string; token?: string; detail: string; amount?: string; pnl?: string; fee?: string };
 
