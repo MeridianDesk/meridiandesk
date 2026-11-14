@@ -13,3 +13,4 @@
 # keeper deps
 keeper/node_modules/
 node_modules/
+keeper/.cross-*.json

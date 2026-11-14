@@ -2,6 +2,7 @@
 // Meridian keeper — three jobs, one loop:
 //   1. mirror   (testnet 46630 only) copy mainnet Chainlink answers into the MirrorFeeds
 //   2. liquidate  scan open perps positions, call liquidate(id) when positionHealth says so
+//   2b. cross   scan Cross accounts (Deposited/CrossOpened logs), call liquidate(user) when accountSnapshot says so
 //   3. settle     find the Chainlink round that brackets each expired option, call settle(id, roundId)
 // Funding needs no keeper: PerpsEngine accrues it lazily on every open/close/liquidate.
 //
@@ -11,7 +12,7 @@
 //   PUSHER_PK  testnet only — must be the MirrorFeed pusher (immutable, = deployer)
 // Usage: node keeper.mjs [--live] [--once] [--interval=15] [--chain=46630]
 
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, writeFileSync } from "node:fs";
 import { createPublicClient, createWalletClient, http, fallback, parseAbi, formatUnits } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { robinhood, robinhoodTestnet } from "viem/chains";
@@ -65,6 +66,12 @@ const optAbi = parseAbi([
   "function nextOptionId() view returns (uint256)",
   "function getOption(uint256) view returns ((address owner,uint64 expiry,bool isCall,uint8 status,address token,uint128 strike,uint128 quantity,uint128 premium,uint128 maxPayout))",
   "function settle(uint256,uint80)",
+]);
+const crossAbi = parseAbi([
+  "event Deposited(address indexed user, uint256 amount)",
+  "event CrossOpened(address indexed user, address indexed token, bool isLong, uint16 leverageBps, uint256 size, uint256 price, uint256 fee)",
+  "function accountSnapshot(address) view returns ((uint256 crossWalletBalance,int256 crossPerpUPnL,uint256 longOptionMark,uint256 longOptionCounted,int256 crossEquityRaw,uint256 crossEquity,uint256 crossIM,uint256 crossMM,uint256 perpNotional,uint256 marginRatioWad,uint256 freeCollateral,uint256 withdrawable,bool liquidatable,bool backstopEligible))",
+  "function liquidate(address)",
 ]);
 const regAbi = parseAbi(["function oracleOf(address) view returns (address,uint32)"]);
 
@@ -125,6 +132,49 @@ async function liquidate() {
   log("liq", `scanned ${next - 1} ids · ${open} open`);
 }
 
+// Cross accounts: discovered from logs once, then incrementally. Start block per chain (deploy block).
+const CROSS_START = { 46630: 153_088_089n, 4663: 113_997_727n }[CHAIN] ?? BigInt(process.env.CROSS_START_BLOCK ?? 0);
+// Scan progress persists across restarts (keeper/.cross-<chain>.json, gitignored) so a slow free-tier backfill runs once.
+const crossFile = here + `.cross-${CHAIN}.json`;
+const crossSaved = existsSync(crossFile) ? JSON.parse(readFileSync(crossFile, "utf8")) : null;
+const crossUsers = new Set(crossSaved?.users ?? []);
+let crossFrom = crossSaved ? BigInt(crossSaved.from) : CROSS_START;
+const saveCross = () => writeFileSync(crossFile, JSON.stringify({ from: crossFrom.toString(), users: [...crossUsers] }));
+async function crossScan() {
+  if (!dep.CrossMarginAccount) return;
+  const head = await pub.getBlockNumber();
+  const STEP = BigInt(process.env.LOG_STEP ?? 5_000);
+  for (let a = crossFrom; a <= head; a += STEP) {
+    const b = a + STEP - 1n < head ? a + STEP - 1n : head;
+    let logs;
+    for (let t = 0; ; t++) {
+      try { logs = await pub.getLogs({ address: dep.CrossMarginAccount, events: crossAbi.filter((x) => x.type === "event"), fromBlock: a, toBlock: b }); break; }
+      catch (e) { if (t >= 4) { saveCross(); throw e; } await new Promise((r) => setTimeout(r, 1500 * (t + 1))); } // free-tier RPC: back off + retry
+    }
+    for (const l of logs) crossUsers.add(l.args.user);
+    crossFrom = b + 1n;
+    if (STEP <= 100n) await new Promise((r) => setTimeout(r, 120)); // stay under free-tier rate limits
+  }
+  saveCross();
+}
+
+async function crossLiquidate() {
+  if (!dep.CrossMarginAccount) return;
+  await crossScan();
+  let checked = 0, stale = 0;
+  for (const u of crossUsers) {
+    let s;
+    try { s = await pub.readContract({ address: dep.CrossMarginAccount, abi: crossAbi, functionName: "accountSnapshot", args: [u] }); }
+    catch { stale++; continue; } // a stale Cross price reverts the snapshot → liquidation paused by design
+    checked++;
+    if (s.perpNotional === 0n || !s.liquidatable) continue;
+    const ratio = s.marginRatioWad === 2n ** 256n - 1n ? "∞" : (Number(s.marginRatioWad) / 1e16).toFixed(1) + "%";
+    log("xliq", `${u} equity ${px(s.crossEquity, 6)} MM ${px(s.crossMM, 6)} ratio ${ratio}${s.backstopEligible ? " BACKSTOP" : ""} → liquidate`);
+    await send(keeper, "xliq", { address: dep.CrossMarginAccount, abi: crossAbi, functionName: "liquidate", args: [u] });
+  }
+  log("xliq", `${crossUsers.size} Cross accounts · ${checked} checked${stale ? ` · ${stale} snapshot reverted (oracle stale?)` : ""}`);
+}
+
 /** Round r with ts(r) ≤ expiry < ts(r+1), walking back from latest within the current phase. */
 async function bracketRound(feed, expiry) {
   const [latest, , , latestTs] = await pub.readContract({ address: feed, abi: agg, functionName: "latestRoundData" });
@@ -163,7 +213,7 @@ async function settle() {
 }
 
 async function tick() {
-  for (const [name, fn] of [["mirror", mirror], ["liq", liquidate], ["settle", settle]]) {
+  for (const [name, fn] of [["mirror", mirror], ["liq", liquidate], ["xliq", crossLiquidate], ["settle", settle]]) {
     try { await fn(); } catch (e) { log(name, `error: ${e.shortMessage ?? e.message}`); }
   }
 }

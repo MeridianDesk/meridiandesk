@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { brand, desks, execLive, hero, how, latency, legal, manifesto, markets, proof, risk, why } from "@/content/copy";
+import { brand, commonLedger as cl, desks, execLive, hero, how, latency, legal, manifesto, markets, proof, risk, why } from "@/content/copy";
 import { clusters, featured } from "@/content/featured";
+import { ACTIVE_CHAIN_ID } from "@/content/chain";
+import { deployed } from "@/content/deployments";
 import { OptionsArt, PerpsArt } from "@/components/home/desk-art";
 import { LiveExecution } from "@/components/home/live-execution";
 import { ContractAddresses } from "@/components/home/contract-addresses";
@@ -16,6 +18,7 @@ const short = "[@media(min-width:768px)_and_(max-height:780px)]";
 
 export default function Home() {
   const half = Math.ceil(featured.length / 2);
+  const crossLive = !!deployed(ACTIVE_CHAIN_ID, "CrossMarginAccount");
   return (
     <div className="min-h-screen bg-void font-inter text-ivory">
       <VNav />
@@ -88,10 +91,10 @@ export default function Home() {
             kicker={<Kicker>Two desks</Kicker>}
             title={
               <span id="h-desks">
-                Two products. <span className="v-grad-text">Never one button.</span>
+                Two products. <span className="v-grad-text">One ledger if you want it.</span>
               </span>
             }
-            sub="Perps and Options run as separate desks — separate navigation, risk engine and positions."
+            sub="Perps and Options run as separate desks — separate navigation and positions. Choose Isolated per position, or Cross to back both from one USDG account."
           />
           <div className="mt-14 grid gap-5 lg:grid-cols-2">
             {([desks.perps, desks.options] as const).map((d, i) => (
@@ -119,6 +122,67 @@ export default function Home() {
                 </Tilt3D>
               </Reveal3D>
             ))}
+          </div>
+        </section>
+
+        {/* 2b · COMMON LEDGER — Cross margin across both desks (brief §13.5) */}
+        <section id="common-ledger" aria-labelledby="h-ledger" className="p-2 md:p-3">
+          <div className="relative isolate overflow-hidden rounded-[10px] border border-dawn/20 bg-[radial-gradient(70%_80%_at_85%_10%,#2a1f14_0%,#0c0c0d_60%)] py-24 md:py-32">
+            <div className={`${wrap} grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]`}>
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Kicker>{cl.kicker}</Kicker>
+                  <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-plex text-[10.5px] uppercase tracking-[0.14em] ${crossLive ? "border-dawn/40 text-dawn" : "border-white/15 text-haze"}`}>
+                    <span className={`size-1.5 rounded-full ${crossLive ? "bg-dawn" : "bg-smoke"}`} aria-hidden="true" />
+                    {crossLive ? cl.live : cl.rolling}
+                  </span>
+                </div>
+                <h2 id="h-ledger" className="mt-6 font-zal text-[40px] font-semibold leading-[1.04] tracking-[-0.035em] md:text-[60px]">
+                  {cl.titleA} <span className="v-grad-text">{cl.titleB}</span>
+                </h2>
+                <p className="mt-5 max-w-[560px] text-[17px] leading-relaxed text-ivory/90">{cl.bridge}</p>
+                <p className="mt-4 max-w-[560px] text-[15px] leading-relaxed text-haze">{cl.body}</p>
+                <p className="mt-6 font-plex text-[12px] uppercase tracking-[0.14em] text-dawn">{cl.tagline}</p>
+                <ul className="mt-8 grid gap-px overflow-hidden rounded-[6px] border border-white/10 bg-white/[0.07] sm:grid-cols-3">
+                  {cl.points.map((p) => (
+                    <li key={p.k} className="bg-char px-4 py-4">
+                      <span className="font-plex text-[10.5px] uppercase tracking-[0.14em] text-smoke">{p.k}</span>
+                      <p className="mt-1.5 text-[13.5px] leading-snug text-ivory">{p.v}</p>
+                    </li>
+                  ))}
+                </ul>
+                {crossLive ? (
+                  <div className="mt-8">
+                    <PrimaryBtn href={`${APP}/perps`}>{cl.cta}</PrimaryBtn>
+                  </div>
+                ) : null}
+              </div>
+
+              <Reveal3D>
+                <Tilt3D max={6}>
+                  <Card className="p-6 md:p-8">
+                    <div className="flex items-center justify-between">
+                      <span className="font-plex text-[11px] uppercase tracking-[0.16em] text-smoke">{cl.ledgerLabel}</span>
+                      <span className="flex gap-1.5">
+                        {["Perps", "Options"].map((d) => (
+                          <span key={d} className="rounded-[3px] border border-dawn/30 px-1.5 py-0.5 font-plex text-[10.5px] text-dawn">{d}</span>
+                        ))}
+                      </span>
+                    </div>
+                    <dl className="z-pop-1 mt-6 divide-y divide-white/[0.07] rounded-[6px] border border-white/10 bg-void">
+                      {cl.rows.map(([k, v], i) => (
+                        <div key={k} className={`flex items-center justify-between px-4 py-3.5 ${i === cl.rows.length - 1 ? "bg-dawn/[0.06]" : ""}`}>
+                          <dt className={`font-zal text-[15px] ${i === cl.rows.length - 1 ? "font-semibold text-dawn" : "text-ivory"}`}>{k}</dt>
+                          <dd className="font-plex text-[12px] text-haze">{v}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                    <p className="mt-5 font-plex text-[11.5px] leading-relaxed text-smoke">{cl.ratioNote}</p>
+                  </Card>
+                </Tilt3D>
+              </Reveal3D>
+            </div>
+            <p className={`${wrap} mt-14 max-w-[1240px] border-t border-white/10 pt-6 text-[13.5px] leading-relaxed text-haze`}>{cl.risk}</p>
           </div>
         </section>
 

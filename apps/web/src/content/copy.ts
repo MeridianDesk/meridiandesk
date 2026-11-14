@@ -64,13 +64,13 @@ export const desks = {
       ["Leverage", "1× · 1.25× · 1.5× · 2×"],
       ["Margin", "USDG"],
       ["Orders", "Market (oracle price)"],
-      ["Mode", "Isolated (v1)"],
+      ["Mode", "Isolated · Cross"],
     ],
   },
   options: {
     tag: "Desk B",
     title: "Options",
-    blurb: "Calls and puts on the same catalog. Separate from perps.",
+    blurb: "Calls and puts on the same catalog. Separate desk, shared ledger if you choose Cross.", // §13.5
     specs: [
       ["Style", "European, cash-settled"],
       ["Premium", "USDG"],
@@ -78,6 +78,33 @@ export const desks = {
       ["Positions", "Buy-to-open (v1)"],
     ],
   },
+} as const;
+
+/** Landing feature band — Common Ledger (spec §13.1, §13.5; verbatim where marked). */
+export const commonLedger = {
+  kicker: "Common Ledger",
+  titleA: "One ledger.",
+  titleB: "Two desks.",
+  bridge: "Common Ledger is Meridian Cross margin — one USDG account for both desks.", // §13.1
+  body: "One USDG margin account backs both Perps and Options. That’s the difference: most venues keep those desks in separate wallets. Isolated mode stays available if you want a position walled off. Cross is capital efficiency, not a safety net — a loss in Cross can liquidate the whole Cross account.", // §13.5
+  tagline: "Works like the cross margin you know — and it covers both desks.", // §13.2
+  points: [
+    { k: "Perps", v: "Cross positions draw on the shared USDG balance." },
+    { k: "Options", v: "Long options count toward Cross equity after a 20% haircut." },
+    { k: "Isolated", v: "Still here. Only the margin on that position is at risk." },
+  ],
+  ledgerLabel: "Cross account · USDG",
+  rows: [
+    ["Wallet", "Deposited USDG"],
+    ["+ Perps uPnL", "Mark-to-oracle"],
+    ["+ Long options", "80% of value counted"],
+    ["= Cross equity", "Backs both desks"],
+  ],
+  ratioNote: "Liquidation at 100% margin ratio. Keep this well below 80%.", // §13.6
+  risk: "In Cross mode, one losing position can liquidate your entire Cross account. Stock Tokens trade on a 24/5 session. A Monday open gap can move Cross equity and liquidation prices. Low leverage does not remove liquidation risk.", // §13.5
+  live: "Cross is live",
+  rolling: "Cross rolling out under guarded launch",
+  cta: "Try Cross",
 } as const;
 
 export const markets = {
